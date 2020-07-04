@@ -1,0 +1,15 @@
+#!/usr/bin/python3
+# -*-coding:utf-8 -*-
+import sys
+
+parameters = sys.argv
+
+
+def __error_and_exit(error_message: str, suggestion: str = None):
+    print(f'ERROR: {error_message}')
+    print(f'\tSUGGESTION:{suggestion}')
+    exit(-1)
+
+
+if len(parameters) == 1:
+    __error_and_exit('')
