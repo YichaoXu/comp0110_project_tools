@@ -1,8 +1,7 @@
 #!/usr/bin/python3
 # -*-coding:utf-8 -*-
 import sys
-
-parameters = sys.argv
+import configparser
 
 
 def __error_and_exit(error_message: str, suggestion: str = None):
@@ -10,6 +9,10 @@ def __error_and_exit(error_message: str, suggestion: str = None):
     print(f'\tSUGGESTION:{suggestion}')
     exit(-1)
 
+config = configparser.ConfigParser()
+
+parameters = sys.argv
 
 if len(parameters) == 1:
     __error_and_exit('')
+

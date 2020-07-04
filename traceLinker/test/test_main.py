@@ -1,7 +1,12 @@
-from pydriller import RepositoryMining
+import os
+from datetime import datetime
 
-path_to_repository = '../../example_repositories/pydriller-test'
+from traceLinker.main import Main
 
-project_repository = RepositoryMining(path_to_repository)
-for commit in project_repository.traverse_commits():
-    commit.modifications
+path_to_comp0110 = os.path.expanduser('~/Project/PycharmProjects/comp0110')
+path_to_data = f'{path_to_comp0110}/.tmp'
+path_to_repository = f'{path_to_comp0110}/example_repositories/simi-project'
+
+start = datetime(2020, 7, 3)
+Main(path_to_data).mining(path_to_repository, start_date=start)
+
