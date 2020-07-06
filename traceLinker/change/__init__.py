@@ -1,5 +1,6 @@
 from traceLinker.change.identifier import ChangeIdentifier
-from traceLinker.change.modification import ModificationAnalyser
+from traceLinker.change.analyser import ModificationAnalyser
+from traceLinker.change.type import cType
 
-__all__ = ['ChangeIdentifier', 'ModificationAnalyser']
+__all__ = ['cType', 'ChangeIdentifier', 'ModificationAnalyser']
 

@@ -1,3 +1,4 @@
-from traceLinker.record.recorder import SourceRecorder, CommitRecorder
+from traceLinker.record.database import DbRecorderFactory
+from traceLinker.record.recorder import DataRecorder
 
-__all__ = ['SourceRecorder', 'CommitRecorder']
+__all__ = ['DbRecorderFactory', 'DataRecorder']

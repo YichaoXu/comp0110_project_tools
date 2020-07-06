@@ -4,7 +4,7 @@ import subprocess
 from traceLinker.change import ChangeIdentifier
 
 
-class ModificationAnalyser: # Refactory Class for the identifier
+class ModificationAnalyser(object): # Refactory Class for the identifier
     FILENAME_AFTER = 'after'
     FILENAME_BEFORE = 'before'
     CMD_DIFF = 'gumtree textdiff {before} {after}'

@@ -1,28 +1,30 @@
 import re
 from datetime import datetime
 from pydriller import RepositoryMining
-from traceLinker.record import *
-from traceLinker.change import *
+
+from traceLinker.change import ChangeIdentifier
+from traceLinker.record import DataRecorder
 
 
-class Main:
+class Main(object):
 
-    def __init__(self, software_data_dir: str):
-        self.__src_sub_path = None
-        self.__test_sub_path = None
-        self.__recorder = CommitRecorder(software_data_dir)
-        self.__analyser = ModificationAnalyser(software_data_dir)
+    def __init__(self, tmp_data_dir: str):
+        self.__tmp_data_dir = tmp_data_dir
 
     def mining(
-            self, repos_path: str,
+            self, repos_root_path: str, repos_name: str,
             start_date: datetime = None, end_date: datetime = None,
             src_sub_path: str = 'src', test_sub_path: str = 'test'
     ):
+        repos_path = f'{repos_root_path}/{repos_name}'
         repository = RepositoryMining(repos_path, since=start_date, to=end_date)
-        self.__src_sub_path = src_sub_path
-        self.__test_sub_path = test_sub_path
+        identifier = ChangeIdentifier(self.__tmp_data_dir)
+        recorder = DataRecorder(self.__tmp_data_dir, repos_name)
         for commit in repository.traverse_commits():
+            if recorder.is_recorded(commit.hash): continue
+            recorder.start_commit(commit.hash, commit.author_date)
             for changed_file in commit.modifications:
+                recorder.for_file(changed_file)
                 code_after = changed_file.source_code
                 code_before = changed_file.source_code_before
                 all_changed = (
