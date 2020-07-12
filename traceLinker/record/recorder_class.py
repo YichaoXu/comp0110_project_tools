@@ -34,13 +34,13 @@ SELECT_LAST_INSERT_CLASS_ID = """
 
 UPDATE_CLASS_NAME = """
     UPDATE {db_name}_classes 
-        SET simple_name = '{new_name}', 
+        SET simple_name = '{new_name}'
         WHERE id = {id}
 """
 
 UPDATE_METHOD_IN_CLASS = """
     UPDATE {db_name}_methods 
-        SET class_id = {id_after},
+        SET class_id = {id_after}
         WHERE class_id = {id_before}
 """
 
@@ -57,7 +57,7 @@ class ClassRecorder(object):
 
     def __init__(self, db_name: str, db_connection: Connection):
         if db_name not in ClassRecorder.__table_initialised_dbs:
-            create_sql = CREATE_TABLE_FOR_CLASS.format(db_name)
+            create_sql = CREATE_TABLE_FOR_CLASS.format(db_name=db_name)
             db_connection.execute(create_sql).close()
             db_connection.commit()
             ClassRecorder.__table_initialised_dbs.append(db_name)
@@ -82,16 +82,16 @@ class ClassRecorder(object):
         return cur_id
 
     def __get_id(self, name: str, file_id: int) -> Optional[int]:
-        select_sql = SELECT_CLASS_ID.format(self.__db_name, simple_name=name, file_id=file_id)
+        select_sql = SELECT_CLASS_ID.format(db_name=self.__db_name, simple_name=name, file_id=file_id)
         exe_cursor = self.__db_connection.execute(select_sql)
         id_container = exe_cursor.fetchone()
-        result = id_container[0] if id_container is None else None
+        result = id_container[0] if id_container is not None else None
         exe_cursor.close()
         return result
 
     def __insert(self, name: str, file_id: int) -> int:
         exe_cursor = self.__db_connection.cursor()
-        exe_cursor.execute(INSERT_CLASS.format(self.__db_name, simple_name=name, file_id=file_id))
+        exe_cursor.execute(INSERT_CLASS.format(db_name=self.__db_name, simple_name=name, file_id=file_id))
         exe_cursor.execute(SELECT_LAST_INSERT_CLASS_ID.format(db_name=self.__db_name))
         result = exe_cursor.fetchone()[0]
         exe_cursor.close()

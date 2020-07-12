@@ -1,3 +1,4 @@
+import sqlite3
 from sqlite3 import Connection
 from typing import Optional
 
@@ -27,13 +28,13 @@ SELECT_LAST_INSERT_FILE_ID = """
 
 UPDATE_FILE_PATH = """
     UPDATE {db_name}_files 
-        SET path = '{new_path}', 
+        SET path = '{new_path}'
         WHERE id = {id}
 """
 
 UPDATE_CLASSES_IN_FILE = """
     UPDATE {db_name}_classes 
-        SET file_id = {id_after}, 
+        SET file_id = {id_after}
         WHERE file_id = {id_before}
 """
 
@@ -51,7 +52,7 @@ class FileRecorder(object):
 
     def __init__(self, db_name: str, db_connection: Connection):
         if db_name not in FileRecorder.__table_initialised_dbs:
-            create_sql = CREATE_TABLE_FOR_FILE.format(db_name)
+            create_sql = CREATE_TABLE_FOR_FILE.format(db_name=db_name)
             db_connection.execute(create_sql).close()
             db_connection.commit()
             FileRecorder.__table_initialised_dbs.append(db_name)
@@ -68,17 +69,21 @@ class FileRecorder(object):
         if id_current is None: return id_exist if id_exist is not None else self.__insert(new_path)
         db_name = self.__db_name
         exe_cursor = self.__db_connection.cursor()
-        if id_exist is not None:
-            exe_cursor.execute(UPDATE_CLASSES_IN_FILE.format(db_name=db_name, id_before=id_exist, id_after=id_current))
-            exe_cursor.execute(REMOVE_DUPLICATE_FILE.format(db_name=db_name, id=id_exist))
-        exe_cursor.execute(UPDATE_FILE_PATH.format(db_name=db_name, new_path=new_path, id=id_current))
+        try:
+            if id_exist is not None:
+                exe_cursor.execute(UPDATE_CLASSES_IN_FILE.format(db_name=db_name, id_before=id_exist, id_after=id_current))
+                exe_cursor.execute(REMOVE_DUPLICATE_FILE.format(db_name=db_name, id=id_exist))
+            exe_cursor.execute(UPDATE_FILE_PATH.format(db_name=db_name, new_path=new_path, id=id_current))
+        except sqlite3.IntegrityError as err:
+            print(err)
+        exe_cursor.close()
         exe_cursor.close()
         return id_current
 
     def __get_id(self, path: str) -> Optional[int]:
         exe_cursor = self.__db_connection.execute(SELECT_FILE_ID.format(db_name=self.__db_name, path=path))
         id_container = exe_cursor.fetchone()
-        result = id_container[0] if id_container is None else None
+        result = id_container[0] if id_container is not None else None
         exe_cursor.close()
         return result
 
