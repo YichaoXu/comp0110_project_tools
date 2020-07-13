@@ -7,7 +7,6 @@ from sqlite3 import Connection
 from typing import Optional
 
 # 4. TABLE METHOD
-from traceLinker.change import cType
 
 CREATE_TABLE_FOR_METHOD = """
     CREATE TABLE if NOT EXISTS {db_name}_methods (
