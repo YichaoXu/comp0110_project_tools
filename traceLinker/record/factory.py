@@ -1,5 +1,4 @@
 import sqlite3
-import re
 from traceLinker.record import ClassRecorder, MethodRecorder, CommitRecorder, FileRecorder
 
 

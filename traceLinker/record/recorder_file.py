@@ -1,97 +1,89 @@
-import sqlite3
 from sqlite3 import Connection
-from typing import Optional
+from traceLinker.record.abs_recorder import SqlStmtsHolder, AbsRecorder
 
-# SQL STATEMENTS
 
-CREATE_TABLE_FOR_FILE = """
-    CREATE TABLE if NOT EXISTS {db_name}_files (
-        id INTEGER PRIMARY KEY AUTOINCREMENT, 
-        path VARCHAR(63) NOT NULL,
-        CONSTRAINT path_unique UNIQUE (path)
-    )
-"""
+class FileStmts(SqlStmtsHolder):
 
-SELECT_FILE_ID = """
-    SELECT id FROM {db_name}_files
-        WHERE path = '{path}'
-"""
+    def create_db_stmt(self) -> str:
+        return """
+        CREATE TABLE if NOT EXISTS files (
+            id INTEGER PRIMARY KEY AUTOINCREMENT, 
+            path VARCHAR(63) NOT NULL,
+            CONSTRAINT path_unique UNIQUE (path)
+        )
+        """
 
-INSERT_FILE_PATH = """
-    INSERT OR IGNORE INTO {db_name}_files (path)
-        VALUES ('{path}') 
-"""
+    def insert_row_and_select_pk_stmt(self) -> str:
+        return """
+        INSERT OR IGNORE INTO files (path)
+            OUTPUT Inserted.id
+            VALUES (:path) 
+        """
 
-SELECT_LAST_INSERT_FILE_ID = """
-    SELECT last_insert_rowid() FROM {db_name}_files
-"""
+    def select_primary_key_stmt(self) -> str:
+        return """
+        SELECT id FROM files
+            WHERE path = :path
+        """
 
-UPDATE_FILE_PATH = """
-    UPDATE {db_name}_files 
-        SET path = '{new_path}'
-        WHERE id = {id}
-"""
+    def update_file_path_stmt(self) -> str:
+        return """
+        UPDATE files 
+            SET path = :new_path
+            WHERE id = :id
+        """
 
-UPDATE_CLASSES_IN_FILE = """
-    UPDATE {db_name}_classes 
-        SET file_id = {id_after}
-        WHERE file_id = {id_before}
-"""
+    def update_classes_in_file_stmt(self) -> str:
+        return """
+        UPDATE classes 
+            SET file_id = :id_after
+            WHERE file_id = :id_before
+        """
 
-REMOVE_DUPLICATE_FILE = """
-    DELETE FROM {db_name}_files 
-        WHERE id={id}
-"""
+    def rm_duplicate_file_stmt(self) -> str:
+        return """
+        DELETE FROM files 
+            WHERE id = :id
+        """
 
 # CLASSES
 
 
-class FileRecorder(object):
+class FileRecorder(AbsRecorder):
 
     __table_initialised_dbs = []
 
-    def __init__(self, db_name: str, db_connection: Connection):
-        if db_name not in FileRecorder.__table_initialised_dbs:
-            create_sql = CREATE_TABLE_FOR_FILE.format(db_name=db_name)
-            db_connection.execute(create_sql).close()
-            db_connection.commit()
-            FileRecorder.__table_initialised_dbs.append(db_name)
-        self.__db_name = db_name
-        self.__db_connection = db_connection
+    def __init__(self, db_connection: Connection):
+        AbsRecorder.__init__(self, db_connection, FileStmts())
 
-    def record(self, path: str) -> int:
-        previous_same_path_id = self.__get_id(path)
-        return previous_same_path_id if previous_same_path_id is not None else self.__insert(path)
+    def new(self, path: str) -> int:
+        path_id = self._get_primary_key(path=path)
+        path_id = self._insert_new_row_and_return_primary_key(path=path) if path_id is None else path_id
+        return path_id
 
-    def record_relocate(self, old_path: str, new_path: str) -> int:
-        id_current = self.__get_id(old_path)
-        id_exist = self.__get_id(new_path)
-        if id_current is None: return id_exist if id_exist is not None else self.__insert(new_path)
-        db_name = self.__db_name
-        exe_cursor = self.__db_connection.cursor()
-        try:
+    def relocate(self, old_path: str, new_path: str) -> int:
+        id_current = self._get_primary_key(path=old_path)
+        id_exist = self._get_primary_key(path=new_path)
+        db_cursor = self._db_connection.cursor()
+        db_stmts = self.__get_stmts()
+        if id_current is None:
             if id_exist is not None:
-                exe_cursor.execute(UPDATE_CLASSES_IN_FILE.format(db_name=db_name, id_before=id_exist, id_after=id_current))
-                exe_cursor.execute(REMOVE_DUPLICATE_FILE.format(db_name=db_name, id=id_exist))
-            exe_cursor.execute(UPDATE_FILE_PATH.format(db_name=db_name, new_path=new_path, id=id_current))
-        except sqlite3.IntegrityError as err:
-            print(err)
-        exe_cursor.close()
-        exe_cursor.close()
-        return id_current
+                output_id = id_exist
+            else: #if id_exist is None:
+                output_id = self._insert_new_row_and_return_primary_key(path=new_path)
+        else : # if id_current is not None:
+            if id_exist is None:
+                relocate_sql = db_stmts.update_file_path_stmt()
+                db_cursor.execute(relocate_sql, {'new_path': new_path, 'id': id_current})
+                db_cursor.close()
+                output_id = id_current
+            else: # if id_exist is not None:
 
-    def __get_id(self, path: str) -> Optional[int]:
-        exe_cursor = self.__db_connection.execute(SELECT_FILE_ID.format(db_name=self.__db_name, path=path))
-        id_container = exe_cursor.fetchone()
-        result = id_container[0] if id_container is not None else None
-        exe_cursor.close()
-        return result
 
-    def __insert(self, path) -> int:
-        exe_cursor = self.__db_connection.cursor()
-        exe_cursor.execute(INSERT_FILE_PATH.format(db_name=self.__db_name, path=path))
-        exe_cursor.execute(SELECT_LAST_INSERT_FILE_ID.format(db_name=self.__db_name))
-        id_container = exe_cursor.fetchone()
-        if id_container is None: raise LookupError("DATABASE: mistakenly handle the data")
-        exe_cursor.close()
-        return id_container[0]
+        db_cursor.close()
+        return output_id
+
+    def __get_stmts(self) -> FileStmts:
+        stmts = self._db_stmts
+        if not isinstance(stmts, FileStmts): raise TypeError("IMPOSSIBLE")
+        return stmts

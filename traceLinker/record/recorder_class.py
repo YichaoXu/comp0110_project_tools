@@ -64,11 +64,11 @@ class ClassRecorder(object):
         self.__db_name = db_name
         self.__db_connection = db_connection
 
-    def record(self, name: str, file_id: int) -> int:
+    def new(self, name: str, file_id: int) -> int:
         cur_id = self.__get_id(name, file_id)
         return cur_id if cur_id is not None else self.__insert(name, file_id)
 
-    def record_rename(self, old_name: str, new_name: str, file_id: int) -> int:
+    def rename(self, old_name: str, new_name: str, file_id: int) -> int:
         cur_id = self.__get_id(old_name, file_id)
         exist_id = self.__get_id(new_name, file_id)
         if cur_id is None: return exist_id if exist_id is not None else  self.__insert(new_name, file_id)

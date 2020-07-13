@@ -24,38 +24,36 @@ class Main(object):
         recorder = self.__recorder
         repository = self.__repository
         for commit in repository.traverse_commits():
-            recorder.for_commit.start_record(commit.hash, commit.author_date)
-            if recorder.for_commit.is_recorded_before():
-                recorder.for_commit.end_record()
-                continue
+            if recorder.for_commit.is_recorded_before(commit.hash): continue
+            recorder.for_commit.start(commit.hash, commit.author_date)
             for changed_file in commit.modifications:
                 path_before = changed_file.old_path
                 path_after = changed_file.new_path
                 if path_before is None:  # Created new file
                     if test_sub_path not in path_after and src_sub_path not in path_after: continue
-                    file_id = recorder.for_file.new(path_after)
+                    file_id = recorder.for_file.start(path_after)
                     self.__handle_create_or_remove_file(commit.hash, file_id, changed_file, cType.CREATE)
                 elif path_after is None:  # Removed previous file
                     if test_sub_path not in path_before and src_sub_path not in path_before: continue
-                    file_id = recorder.for_file.new(path_before)
+                    file_id = recorder.for_file.start(path_before)
                     self.__handle_create_or_remove_file(commit.hash, file_id, changed_file, cType.REMOVE)
                 elif path_before != path_after:  # Relocated file paths
                     if test_sub_path not in path_after and src_sub_path not in path_after: continue
-                    file_id = recorder.for_file.record_relocate(path_before, path_after)
+                    file_id = recorder.for_file.relocate(path_before, path_after)
                     self.__handle_file_modify(commit.hash, file_id, changed_file)
                 else:  # Path did not changed
                     if test_sub_path not in path_after and src_sub_path not in path_after: continue
-                    file_id = recorder.for_file.new(path_before)
+                    file_id = recorder.for_file.start(path_before)
                     self.__handle_file_modify(commit.hash, file_id, changed_file)
-            recorder.for_commit.end_record()
+            recorder.for_commit.stop()
 
     def __handle_create_or_remove_file(self, hash: str, file_id: int, file: Modification, change_type: cType):
         recorder = self.__recorder
         class_extractor = Main.ClassExtractor(file)
         for class_name in class_extractor.get_all_class_names():
-            class_id = recorder.for_class.new(class_name, file_id)
+            class_id = recorder.for_class.start(class_name, file_id)
             for method_name in class_extractor.get_method_names_in(class_name):
-                method_id = recorder.for_method.new(method_name, class_id)
+                method_id = recorder.for_method.start(method_name, class_id)
                 recorder.for_method.change(str(change_type), method_id, hash)
 
     def __handle_file_modify(self, hash: str, file_id: int, file: Modification):
@@ -69,14 +67,14 @@ class Main(object):
             if change_type == str(cType.UPDATE):
                 class_id = recorder.for_class.rename(class_name, change_detail, file_id)
             else:
-                class_id = recorder.for_class.new(class_name, file_id)
+                class_id = recorder.for_class.start(class_name, file_id)
             for method_name in class_extractor.get_method_names_in(class_name):
                 change_type, change_detail = identifier.get_method_change_type(method_name)
                 if change_type == str(cType.NOCHANGE): continue
                 if change_type == str(cType.UPDATE):
                     method_id = recorder.for_method.rename(method_name, change_detail, class_id)
                 else:
-                    method_id = recorder.for_method.new(method_name, class_id)
+                    method_id = recorder.for_method.start(method_name, class_id)
                 recorder.for_method.change(change_type, method_id, hash)
 
     class ClassExtractor(object):
