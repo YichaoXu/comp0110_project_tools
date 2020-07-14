@@ -92,6 +92,7 @@ class MethodStmtHolder(SqlStmtHolder):
             WHERE file_path = :old_path
         """
 
+
 class MethodTableHandler(AbsTableHandler):
 
     def _get_stmts_holder(self) -> MethodStmtHolder:

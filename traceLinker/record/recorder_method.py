@@ -1,78 +1,8 @@
 import sqlite3
-import sys
 from sqlite3 import Connection
-
 
 # SQL STATEMENTS
 from typing import Optional
-
-# 4. TABLE METHOD
-
-CREATE_TABLE_FOR_METHOD = """
-    CREATE TABLE if NOT EXISTS {db_name}_methods (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        simple_name VARCHAR(31) NOT NULL, 
-        class_id  INTEGER NOT NULL, 
-        CONSTRAINT method_unique 
-            UNIQUE (simple_name, class_id)
-        CONSTRAINT related_to_class 
-            FOREIGN KEY (class_id) 
-            REFERENCES {db_name}_class(id)
-    )
-"""
-
-SELECT_METHOD_ID = """
-    SELECT (id) FROM {db_name}_methods
-        WHERE simple_name = '{simple_name}' 
-            AND class_id = '{class_id}'
-"""
-
-INSERT_METHOD = """
-    INSERT INTO {db_name}_methods (simple_name, class_id) 
-        VALUES ('{simple_name}', '{class_id}') 
-"""
-
-SELECT_LAST_INSERT_METHOD_ID = """
-    SELECT last_insert_rowid() FROM {db_name}_methods
-"""
-
-UPDATE_METHOD_NAME = """
-    UPDATE {db_name}_methods 
-        SET simple_name = '{new_name}'
-        WHERE id = {id}
-"""
-
-REMOVE_DUPLICATE_METHOD="""
-    DELETE FROM {db_name}_methods
-        WHERE id={id}
-"""
-
-# STATEMENT FOR TABLE CHANGE
-
-CREATE_TABLE_FOR_CHANGE = """
-    CREATE TABLE if NOT EXISTS {db_name}_changes (
-        change_type  VARCHAR(31) NOT NULL, 
-        target_method_id INTEGER NOT NULL, 
-        commit_hash VARCHAR(63) NOT NULL, 
-        CONSTRAINT change_unique 
-            UNIQUE (target_method_id, change_type, commit_hash)
-        CONSTRAINT relative_to_method  
-            FOREIGN KEY (target_method_id) 
-            REFERENCES {db_name}_methods(method_id)
-    )
-"""
-
-INSERT_CHANGE = """
-    INSERT OR IGNORE INTO {db_name}_changes  (change_type, target_method_id, commit_hash)
-        VALUES ('{change_type}', {target_method_id}, '{commit_hash}') 
-"""
-
-UPDATE_CHANGES_TO_METHOD = """
-    UPDATE {db_name}_changes 
-        SET target_method_id = {id_after}
-        WHERE target_method_id = {id_before}
-"""
-
 
 # PYTHON SOURCE CODES
 class MethodRecorder(object):

@@ -1,54 +1,6 @@
 from sqlite3 import Connection
 from traceLinker.record.abs_recorder import SqlStmtsHolder, AbsRecorder
 
-
-class FileStmts(SqlStmtsHolder):
-
-    def create_db_stmt(self) -> str:
-        return """
-        CREATE TABLE if NOT EXISTS files (
-            id INTEGER PRIMARY KEY AUTOINCREMENT, 
-            path VARCHAR(63) NOT NULL,
-            CONSTRAINT path_unique UNIQUE (path)
-        )
-        """
-
-    def insert_row_and_select_pk_stmt(self) -> str:
-        return """
-        INSERT OR IGNORE INTO files (path)
-            OUTPUT Inserted.id
-            VALUES (:path) 
-        """
-
-    def select_primary_key_stmt(self) -> str:
-        return """
-        SELECT id FROM files
-            WHERE path = :path
-        """
-
-    def update_file_path_stmt(self) -> str:
-        return """
-        UPDATE files 
-            SET path = :new_path
-            WHERE id = :id
-        """
-
-    def update_classes_in_file_stmt(self) -> str:
-        return """
-        UPDATE classes 
-            SET file_id = :id_after
-            WHERE file_id = :id_before
-        """
-
-    def rm_duplicate_file_stmt(self) -> str:
-        return """
-        DELETE FROM files 
-            WHERE id = :id
-        """
-
-# CLASSES
-
-
 class FileRecorder(AbsRecorder):
 
     __table_initialised_dbs = []

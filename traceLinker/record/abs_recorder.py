@@ -2,23 +2,6 @@ import abc
 from sqlite3 import Connection
 from typing import Any
 
-
-class SqlStmtsHolder(object):
-    __metaclass__ = abc.ABCMeta
-
-    @abc.abstractmethod
-    def create_db_stmt(self) -> str:
-        pass
-
-    @abc.abstractmethod
-    def insert_row_and_select_pk_stmt(self) -> str:
-        pass
-
-    @abc.abstractmethod
-    def select_primary_key_stmt(self) -> str:
-        pass
-
-
 class AbsRecorder(object):
     __metaclass__ = abc.ABCMeta
 
