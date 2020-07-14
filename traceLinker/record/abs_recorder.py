@@ -1,28 +1,27 @@
-import abc
-from sqlite3 import Connection
+from datetime import datetime
 from typing import Any
 
-class AbsRecorder(object):
-    __metaclass__ = abc.ABCMeta
+from traceLinker.record.database import TableHandlerFactory
 
-    def __init__(self, connection: Connection, stmts: SqlStmtsHolder):
-        connection.execute(stmts.create_db_stmt()).close()
-        connection.commit()
-        self._db_stmts = stmts
-        self._db_connection = connection
 
-    def _get_primary_key(self, **unique_keys) -> Any:
-        select_sql = self._db_stmts.select_primary_key_stmt()
-        exe_cursor = self._db_connection.execute(select_sql, unique_keys)
-        primary_key_holder = exe_cursor.fetchone()
-        result = primary_key_holder[0] if primary_key_holder is not None else None
-        ''.format()
-        exe_cursor.close()
-        return result
+class Recorder(object):
 
-    def _insert_new_row_and_return_primary_key(self, **parameters) -> Any:
-        insert_sql = self._db_stmts.insert_row_and_select_pk_stmt()
-        exe_cursor = self._db_connection.execute(insert_sql, parameters)
-        result = exe_cursor.fetchone()[0]
-        exe_cursor.close()
-        return result
+    __DATE_TO_STR_FORMAT = '%Y-%m-%d'
+
+    def __init__(self, handler_factory: TableHandlerFactory):
+        self.__table_handler = handler_factory
+
+    def is_record_before(self, commit_hash: str) -> bool:
+        return self.__table_handler.for_commits_table.is_hash_exist(commit_hash)
+
+    def record_commit(self, commit_hash: str, commit_date: datetime) -> Any:
+        return self.__table_handler.for_commits_table.insert_new_row(
+            commit_hash=commit_hash,
+            commit_date=commit_date.strftime(Recorder.__DATE_TO_STR_FORMAT)
+        )
+
+    def record_relocate(self, old_path: str, new_path: str):
+        ids = self.__table_handler.for_methods_table.find_ids_of_duplication_after_relocate(old_path, new_path)
+        for id in ids:
+            self.__table_handler.for_changes_table
+        return

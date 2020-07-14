@@ -1,36 +1,6 @@
 from sqlite3 import Connection
 from datetime import datetime
-from traceLinker.record.abs_recorder import SqlStmtsHolder, AbsRecorder
-
-
-class CommitStmts(SqlStmtsHolder):
-
-    def create_db_stmt(self) -> str:
-        return """
-        CREATE TABLE if NOT EXISTS commits(
-            hash_value VARCHAR(63) PRIMARY KEY,
-            commit_date DATE NOT NULL,
-            CONSTRAINT hash_unique UNIQUE (hash_value)
-        )
-        """
-
-    def insert_row_and_select_pk_stmt(self) -> str:
-        return """
-        INSERT INTO commits 
-            (hash_value, commit_date)
-        VALUES
-            (:hash_value, :commit_date) 
-        """
-
-    def count_commit_stmts(self) -> str:
-        return """
-        SELECT COUNT(*) FROM commits 
-            WHERE hash_value = ?
-        """
-
-    def select_primary_key_stmt(self) -> str:
-        raise NotImplementedError("UNSUPPORTED SQL STMT")
-
+from traceLinker.record.abs_recorder import AbsRecorder
 
 class CommitRecorder(AbsRecorder):
 
