@@ -5,8 +5,8 @@ from typing import List, Dict
 from pydriller import RepositoryMining
 from pydriller.domain.commit import Method, Modification
 
-from traceLinker.change import cType, ModificationAnalyser
-from traceLinker.record import RecorderFactory
+from traceLinker.change import cType, FileChangeAnalyser
+from traceLinker.database import TableHandlerFactory, Recorder
 
 
 class Main(object):
@@ -15,46 +15,53 @@ class Main(object):
             self, tmp_data_dir: str, repos_path: str,
             start_date: datetime = None, end_date: datetime = None
     ):
-        repos_path = repos_path
+        repos_name = repos_path.rpartition('/')[-1]
+        self.__recorder = Recorder(TableHandlerFactory(tmp_data_dir, repos_name))
         self.__repository = RepositoryMining(repos_path, since=start_date, to=end_date)
-        self.__analyser = ModificationAnalyser(tmp_data_dir)
-        self.__recorder = RecorderFactory(tmp_data_dir, repos_path.rpartition('/')[-1])
+        self.__analyser = FileChangeAnalyser(tmp_data_dir)
 
     def mining(self, src_sub_path: str = 'src', test_sub_path: str = 'test'):
-        recorder = self.__recorder
-        repository = self.__repository
-        for commit in repository.traverse_commits():
-            if recorder.for_commit.is_recorded_before(commit.hash): continue
-            recorder.for_commit.start(commit.hash, commit.author_date)
+        for commit in self.__repository.traverse_commits():
+            if self.__recorder.is_record_before(commit.hash): continue
             for changed_file in commit.modifications:
                 path_before = changed_file.old_path
                 path_after = changed_file.new_path
-                if path_before is None:  # Created new file
-                    if test_sub_path not in path_after and src_sub_path not in path_after: continue
-                    file_id = recorder.for_file.start(path_after)
-                    self.__handle_create_or_remove_file(commit.hash, file_id, changed_file, cType.CREATE)
-                elif path_after is None:  # Removed previous file
-                    if test_sub_path not in path_before and src_sub_path not in path_before: continue
-                    file_id = recorder.for_file.start(path_before)
-                    self.__handle_create_or_remove_file(commit.hash, file_id, changed_file, cType.REMOVE)
+                if test_sub_path not in path_after and src_sub_path not in path_after: continue
+                if path_before is None: self.__create(changed_file, commit.hash)
+                elif path_after is None: self.__delete(changed_file, commit.hash)
                 elif path_before != path_after:  # Relocated file paths
-                    if test_sub_path not in path_after and src_sub_path not in path_after: continue
-                    file_id = recorder.for_file.relocate(path_before, path_after)
-                    self.__handle_file_modify(commit.hash, file_id, changed_file)
+                    self.__handle_file_modify(commit.hash, changed_file)
                 else:  # Path did not changed
-                    if test_sub_path not in path_after and src_sub_path not in path_after: continue
-                    file_id = recorder.for_file.start(path_before)
-                    self.__handle_file_modify(commit.hash, file_id, changed_file)
-            recorder.for_commit.stop()
+                    self.__handle_file_modify(commit.hash, changed_file)
+            self.__recorder.record_git_commit(commit.hash, commit.author_date)
 
-    def __handle_create_or_remove_file(self, hash: str, file_id: int, file: Modification, change_type: cType):
-        recorder = self.__recorder
+    def __create(self, file: Modification, commit_hash: str) -> None:
         class_extractor = Main.ClassExtractor(file)
         for class_name in class_extractor.get_all_class_names():
-            class_id = recorder.for_class.start(class_name, file_id)
             for method_name in class_extractor.get_method_names_in(class_name):
-                method_id = recorder.for_method.start(method_name, class_id)
-                recorder.for_method.change(str(change_type), method_id, hash)
+                method_id = self.__recorder.get_method_id(method_name, class_name, file.new_path)
+                self.__recorder.record_add_method(method_id, commit_hash)
+        return None
+
+    def __delete(self, file: Modification, commit_hash: str) -> None:
+        class_extractor = Main.ClassExtractor(file)
+        for class_name in class_extractor.get_all_class_names():
+            for method_name in class_extractor.get_method_names_in(class_name):
+                method_id = self.__recorder.get_method_id(method_name, class_name, file.new_path)
+                self.__recorder.record_remove_method(method_id, commit_hash)
+        return None
+
+    def __relocate(self, file: Modification, commit_hash: str) -> None:
+        self.__recorder.record_file_relocate(file.old_path, file.new_path)
+        class_extractor = Main.ClassExtractor(file)
+        file_suffix = file.filename.rpartition('.')[-1]
+        identifier = self.__analyser.analyse(file.source_code_before, file.source_code, file_suffix)
+        for class_name in class_extractor.get_all_class_names():
+            identifier.get_method_change_type()
+            for method_name in class_extractor.get_method_names_in(class_name):
+                method_id = self.__recorder.get_method_id(method_name, class_name, file.new_path)
+                self.__recorder.record_remove_method(method_id, commit_hash)
+        return None
 
     def __handle_file_modify(self, hash: str, file_id: int, file: Modification):
         recorder = self.__recorder
@@ -78,6 +85,7 @@ class Main(object):
                 recorder.for_method.change(change_type, method_id, hash)
 
     class ClassExtractor(object):
+
         def __init__(self, modified_file: Modification):
             core_dict: Dict[str, List[str]] = {}
             for method in modified_file.changed_methods:

@@ -1,6 +1,7 @@
+from datetime import datetime
 from sqlite3 import Connection
 
-from traceLinker.record.database.abs_table_handler import SqlStmtHolder, AbsTableHandler
+from traceLinker.database.abs_table_handler import SqlStmtHolder, AbsTableHandler
 
 
 class CommitStmtHolder(SqlStmtHolder):
@@ -37,6 +38,8 @@ class CommitStmtHolder(SqlStmtHolder):
 
 class CommitTableHandler(AbsTableHandler):
 
+    __DATE_TO_STR_FORMAT = '%Y-%m-%d'
+
     def __init__(self, db_connection: Connection):
         AbsTableHandler.__init__(self, db_connection, CommitStmtHolder())
         self.__commit_hash = None
@@ -48,6 +51,13 @@ class CommitTableHandler(AbsTableHandler):
         is_recorded_before = (res_cursor.fetchone()[0] != 0)
         res_cursor.close()
         return is_recorded_before
+
+    def insert_new_commit(self, commit_hash: str, commit_date: datetime):
+        return self._insert_new_row(
+            commit_hash=commit_hash,
+            commit_date=commit_date.strftime(CommitTableHandler.__DATE_TO_STR_FORMAT)
+        )
+
 
     def _get_stmts_holder(self) -> CommitStmtHolder:
         stmts = super(CommitTableHandler, self)._get_stmts_holder()

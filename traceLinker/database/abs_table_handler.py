@@ -31,7 +31,7 @@ class AbsTableHandler(object):
     def _get_db_connection(self) -> Connection:
         return self.__db_connection
 
-    def get_primary_key(self, **unique_keys) -> Any:
+    def _select_primary_key(self, **unique_keys) -> Any:
         select_sql = self.__db_stmts.select_primary_key_stmt()
         exe_cursor = self.__db_connection.execute(select_sql, unique_keys)
         primary_key_holder = exe_cursor.fetchone()
@@ -39,12 +39,12 @@ class AbsTableHandler(object):
         exe_cursor.close()
         return result
 
-    def insert_new_row(self, **parameters) -> Any:
+    def _insert_new_row(self, **parameters) -> Any:
         insert_sql = self.__db_stmts.insert_row_and_select_pk_stmt()
         exe_cursor = self.__db_connection.execute(insert_sql, parameters)
         result = exe_cursor.fetchone()[0]
         exe_cursor.close()
         return result
 
-    def commit(self) -> Any:
+    def flash(self) -> Any:
         return self.__db_connection.commit()

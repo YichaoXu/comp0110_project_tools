@@ -1,6 +1,6 @@
 from sqlite3 import Connection
 
-from traceLinker.record.database.abs_table_handler import SqlStmtHolder, AbsTableHandler
+from traceLinker.database.abs_table_handler import SqlStmtHolder, AbsTableHandler
 
 
 class ChangeStmtHolder(SqlStmtHolder):
@@ -19,7 +19,7 @@ class ChangeStmtHolder(SqlStmtHolder):
         return """
             INSERT INTO changes (change_type, target_method_id, commit_hash)
             OUTPUT Inserted.id
-            VALUES (:name, :class, :path) 
+            VALUES (:change_type, :method_id, :commit_hash) 
         """
 
     def select_primary_key_stmt(self) -> str:
@@ -29,8 +29,8 @@ class ChangeStmtHolder(SqlStmtHolder):
     def update_target_method_id_stmt(self) -> str:
         return """
             UPDATE changes 
-            SET target_method_id = :new_method_id
-            WHERE target_method_id = :old_method_id
+            SET target_method_id = :current_method_id
+            WHERE target_method_id = :previous_method_id
         """
 
 
@@ -44,10 +44,13 @@ class ChangeTableHandler(AbsTableHandler):
     def __init__(self, db_connection: Connection):
         AbsTableHandler.__init__(self, db_connection, ChangeStmtHolder())
 
-    def reset_target_method(self, old_method_id: str, new_method_id: str) -> None:
+    def update_target_method(self, previous_method_id: str, current_method_id: str) -> None:
         update_sql = self._get_stmts_holder().update_target_method_id_stmt()
-        parameters = {'old_method_id':old_method_id, 'new_method_id': new_method_id}
+        parameters = {'previous_method_id':previous_method_id, 'current_method_id': current_method_id}
         exe_cursor = self._get_db_connection().execute(update_sql, parameters)
         exe_cursor.close()
         return None
+
+    def insert_new_change(self, change_type: str, target_method_id: int, commit_hash: str) -> int:
+        return self._insert_new_row(change_type=change_type, target_method_id=target_method_id, commit_hash=commit_hash)
 

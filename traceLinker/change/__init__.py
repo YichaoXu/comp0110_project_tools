@@ -1,6 +1,7 @@
-from traceLinker.change.identifier import ChangeIdentifier
-from traceLinker.change.analyser import ModificationAnalyser
-from traceLinker.change.type import cType
+from traceLinker.change.diff_comparer import DiffComparer
+from traceLinker.change.analyser import FileChangeAnalyser
+from traceLinker.change.change_identifier import FileChangeIdentifier
 
-__all__ = ['cType', 'ChangeIdentifier', 'ModificationAnalyser']
+__all__ = ['FileChangeIdentifier', 'FileChangeAnalyser', 'DiffComparer']
+
 
