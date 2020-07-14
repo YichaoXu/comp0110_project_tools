@@ -1,9 +1,9 @@
 from datetime import datetime
 from pydriller import RepositoryMining
 from pydriller.domain.commit import Modification
-from commitsSql.database import TableHandlerFactory, DbRecorder
-from commitsSql.modification import ModificationAnalyser
-from commitsSql.modification.utils import ChangeType
+from commits2Sql.database import TableHandlerFactory, DbRecorder
+from commits2Sql.modification import ModificationAnalyser
+from commits2Sql.modification.utils import ChangeType
 
 
 class Main(object):

@@ -1,7 +1,7 @@
 from sqlite3 import Connection
 from typing import List, Tuple
 
-from commitsSql.database.abs_table_handler import SqlStmtHolder, AbsTableHandler
+from commits2Sql.database.abs_table_handler import SqlStmtHolder, AbsTableHandler
 
 
 class MethodStmtHolder(SqlStmtHolder):

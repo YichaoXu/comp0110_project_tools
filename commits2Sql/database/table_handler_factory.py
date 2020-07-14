@@ -1,9 +1,9 @@
 import sqlite3
 from typing import Dict
 
-from commitsSql.database.commit_table_handler import CommitTableHandler
-from commitsSql.database.method_table_handler import MethodTableHandler
-from commitsSql.database.change_table_handler import ChangeTableHandler
+from commits2Sql.database.commit_table_handler import CommitTableHandler
+from commits2Sql.database.method_table_handler import MethodTableHandler
+from commits2Sql.database.change_table_handler import ChangeTableHandler
 
 
 class TableHandlerFactory(object):
