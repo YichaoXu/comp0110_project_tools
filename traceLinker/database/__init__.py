@@ -1,10 +1,9 @@
-from traceLinker.database.table_handler_factory import TableHandlerFactory
-from traceLinker.database.recorder import Recorder
 
-__all__ = [
-    'TableHandlerFactory',
-    'Recorder'
-]
+__all__ = ['TableHandlerFactory', 'DbRecorder']
+
+from traceLinker.database.table_handler_factory import TableHandlerFactory
+from traceLinker.database.dbrecorder import DbRecorder
+
 
 
 

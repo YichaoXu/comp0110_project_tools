@@ -10,7 +10,7 @@ class SqlStmtHolder(object):
     def create_db_stmt(self) -> str: pass
 
     @abc.abstractmethod
-    def insert_row_and_select_pk_stmt(self) -> str: pass
+    def insert_row_stmt(self) -> str: pass
 
     @abc.abstractmethod
     def select_primary_key_stmt(self) -> str: pass
@@ -40,9 +40,9 @@ class AbsTableHandler(object):
         return result
 
     def _insert_new_row(self, **parameters) -> Any:
-        insert_sql = self.__db_stmts.insert_row_and_select_pk_stmt()
+        insert_sql = self.__db_stmts.insert_row_stmt()
         exe_cursor = self.__db_connection.execute(insert_sql, parameters)
-        result = exe_cursor.fetchone()[0]
+        result = exe_cursor.lastrowid
         exe_cursor.close()
         return result
 

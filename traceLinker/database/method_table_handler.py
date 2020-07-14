@@ -13,16 +13,14 @@ class MethodStmtHolder(SqlStmtHolder):
                 simple_name VARCHAR(32) NOT NULL, 
                 class_name VARCHAR(32) NOT NULL, 
                 file_path VARCHAR(64) NOT NULL, 
-                CONSTRAINT method_unique 
-                    UNIQUE (simple_name, class_name, file_path)
+                CONSTRAINT method_unique UNIQUE (simple_name, class_name, file_path)
             )
         """
 
-    def insert_row_and_select_pk_stmt(self) -> str:
+    def insert_row_stmt(self) -> str:
         return """
             INSERT INTO methods (simple_name, class_name, file_path)
-            OUTPUT Inserted.id
-            VALUES (:method_name, :class_name, :path) 
+            VALUES (:method_name, :class_name, :path); 
         """
 
     def select_primary_key_stmt(self) -> str:
@@ -99,7 +97,7 @@ class MethodStmtHolder(SqlStmtHolder):
 class MethodTableHandler(AbsTableHandler):
 
     def _get_stmts_holder(self) -> MethodStmtHolder:
-        stmts = self._get_stmts_holder()
+        stmts = super(MethodTableHandler, self)._get_stmts_holder()
         if not isinstance(stmts, MethodStmtHolder): raise TypeError("IMPOSSIBLE")
         return stmts
 

@@ -4,7 +4,7 @@ from typing import Any
 from traceLinker.database import TableHandlerFactory
 
 
-class Recorder(object):
+class DbRecorder(object):
 
     def __init__(self, handler_factory: TableHandlerFactory):
         self.__table_handler = handler_factory

@@ -8,30 +8,29 @@ class CommitStmtHolder(SqlStmtHolder):
 
     def create_db_stmt(self) -> str:
         return """
-        CREATE TABLE if NOT EXISTS commits(
+        CREATE TABLE if NOT EXISTS git_commits(
             hash_value VARCHAR(63) PRIMARY KEY,
             commit_date DATE NOT NULL,
             CONSTRAINT hash_unique UNIQUE (hash_value)
         )
         """
 
-    def insert_row_and_select_pk_stmt(self) -> str:
+    def insert_row_stmt(self) -> str:
         return """
-        INSERT INTO commits (hash_value, commit_date)
-            OUTPUT Inserted.hash_value
+        INSERT INTO git_commits (hash_value, commit_date)
             VALUES (:commit_hash, :commit_date) 
         """
 
     def count_commit_stmts(self) -> str:
         return """
-        SELECT COUNT(*) FROM commits 
+        SELECT COUNT(*) FROM git_commits 
             WHERE hash_value = :commit_hash
         """
 
     def select_primary_key_stmt(self) -> str:
         # SHOULD NOT BE USED
         return """
-        SELECT hash_value FROM commits
+        SELECT hash_value FROM git_commits
             WHERE hash_value = :commit_hash
         """
 
@@ -47,7 +46,7 @@ class CommitTableHandler(AbsTableHandler):
 
     def is_hash_exist(self, commit_hash: str):
         count_sql = self._get_stmts_holder().count_commit_stmts()
-        res_cursor = self._get_db_connection().execute(count_sql, {"hash_value": commit_hash})
+        res_cursor = self._get_db_connection().execute(count_sql, {"commit_hash": commit_hash})
         is_recorded_before = (res_cursor.fetchone()[0] != 0)
         res_cursor.close()
         return is_recorded_before

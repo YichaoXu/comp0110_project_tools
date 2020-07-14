@@ -10,15 +10,16 @@ class ChangeStmtHolder(SqlStmtHolder):
             CREATE TABLE if NOT EXISTS changes (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 change_type VARCHAR(31) NOT NULL, 
-                target_method_id INTEGER NOT NULL FOREIGN KEY REFERENCES methods(id), 
-                commit_hash VARCHAR(63) NOT NULL FOREIGN KEY REFERENCES commits(commit_hash)
+                target_method_id INTEGER NOT NULL, 
+                commit_hash VARCHAR(63) NOT NULL, 
+                FOREIGN KEY (target_method_id)  REFERENCES methods(id),
+                FOREIGN KEY (commit_hash)  REFERENCES commits(commit_hash)
             );
         """
 
-    def insert_row_and_select_pk_stmt(self) -> str:
+    def insert_row_stmt(self) -> str:
         return """
             INSERT INTO changes (change_type, target_method_id, commit_hash)
-            OUTPUT Inserted.id
             VALUES (:change_type, :method_id, :commit_hash) 
         """
 
@@ -52,5 +53,5 @@ class ChangeTableHandler(AbsTableHandler):
         return None
 
     def insert_new_change(self, change_type: str, target_method_id: int, commit_hash: str) -> int:
-        return self._insert_new_row(change_type=change_type, target_method_id=target_method_id, commit_hash=commit_hash)
+        return self._insert_new_row(change_type=change_type, method_id=target_method_id, commit_hash=commit_hash)
 
