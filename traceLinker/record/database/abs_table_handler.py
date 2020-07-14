@@ -45,3 +45,6 @@ class AbsTableHandler(object):
         result = exe_cursor.fetchone()[0]
         exe_cursor.close()
         return result
+
+    def commit(self) -> Any:
+        return self.__db_connection.commit()
