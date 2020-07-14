@@ -3,7 +3,7 @@ import re
 import subprocess
 from typing import Dict, Tuple
 from pydriller import Modification
-from traceLinker.modification.utils import ChangeType
+from commitsSql.modification.utils import ChangeType
 
 CMD_DIFF = 'gumtree textdiff {before} {after}'
 

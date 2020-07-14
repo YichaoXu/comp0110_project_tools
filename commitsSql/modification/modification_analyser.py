@@ -1,8 +1,8 @@
 import os
 from typing import List
 
-from traceLinker.modification.diff_analysis_report import AnalysisReport
-from traceLinker.modification.driller_modification_extractor import ModificationExtractor
+from commitsSql.modification.diff_analysis_report import AnalysisReport
+from commitsSql.modification.driller_modification_extractor import ModificationExtractor
 
 FILENAME_AFTER = 'after'
 FILENAME_BEFORE = 'before'

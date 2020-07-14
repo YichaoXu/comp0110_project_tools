@@ -1,7 +1,7 @@
 from datetime import datetime
 from sqlite3 import Connection
 
-from traceLinker.database.abs_table_handler import SqlStmtHolder, AbsTableHandler
+from commitsSql.database.abs_table_handler import SqlStmtHolder, AbsTableHandler
 
 
 class CommitStmtHolder(SqlStmtHolder):

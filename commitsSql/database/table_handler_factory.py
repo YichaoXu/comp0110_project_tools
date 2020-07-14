@@ -1,9 +1,9 @@
 import sqlite3
 from typing import Dict
 
-from traceLinker.database.commit_table_handler import CommitTableHandler
-from traceLinker.database.method_table_handler import MethodTableHandler
-from traceLinker.database.change_table_handler import ChangeTableHandler
+from commitsSql.database.commit_table_handler import CommitTableHandler
+from commitsSql.database.method_table_handler import MethodTableHandler
+from commitsSql.database.change_table_handler import ChangeTableHandler
 
 
 class TableHandlerFactory(object):

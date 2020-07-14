@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Any
 
-from traceLinker.database import TableHandlerFactory
+from commitsSql.database import TableHandlerFactory
 
 
 class DbRecorder(object):

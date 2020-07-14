@@ -1,6 +1,6 @@
 import os
 from datetime import datetime
-from traceLinker.main import Main
+from commitsSql.main import Main
 
 path_to_comp0110 = os.path.expanduser('~/Project/PycharmProjects/comp0110')
 path_to_data = f'{path_to_comp0110}/.tmp'
