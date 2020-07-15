@@ -1,6 +1,6 @@
 from sqlite3 import Connection
 
-from commits2Sql.database.abs_table_handler import SqlStmtHolder, AbsTableHandler
+from commits2sql.database.abs_table_handler import SqlStmtHolder, AbsTableHandler
 
 
 class ChangeStmtHolder(SqlStmtHolder):

@@ -3,15 +3,27 @@ import re
 import subprocess
 from typing import Dict, Tuple
 from pydriller import Modification
-from commits2Sql.modification.utils import ChangeType
+from commits2sql.modification.utils import ChangeType
 
 CMD_DIFF = 'gumtree textdiff {before} {after}'
 
 SPLIT_TREE = '===\n'
 SPLIT_DATA = '\n---\n'
 
-REGEX_CREATE_OR_DELETE = 'SimpleName: (.*?) \[.*?\]'
-REGEX_UPDATE = 'replace (.*?) by (.*)'
+METHOD_DECLARATION = 'MethodDeclaration'
+TYPE_DECLARATION = 'TypeDeclaration'
+JAVADOC_DECLARATION = 'Javadoc'
+
+REGEX_CREATE_OR_DELETE = r'SimpleName: (.+) \[(.+)\]'
+REGEX_UPDATE = r'replace (.+) by (.+)'
+
+
+def is_for_method_or_class(detail: str):
+    return detail.startswith(METHOD_DECLARATION) or detail.startswith(TYPE_DECLARATION)
+
+
+def is_for_javadoc(detail: str):
+    return detail.startswith(JAVADOC_DECLARATION)
 
 
 class AnalysisReport(object):
@@ -22,22 +34,22 @@ class AnalysisReport(object):
         if not exit_code == 0: raise Exception(f'FAIL TO EXECUTION {diff_cmd}')
         self.__core: Dict[str, Tuple[ChangeType, str]] = {}
         changes = (
-            change.split(SPLIT_DATA)
-            for change in diff_output.split(SPLIT_TREE)
-            if change is not None and SPLIT_DATA in change
+            change_data.split(SPLIT_DATA) for change_data in diff_output.split(SPLIT_TREE)
+            if change_data is not None and SPLIT_DATA in change_data
         )
         for change_type, change_detail in changes:
-            if change_type is ChangeType.UPDATE.value:
+            if is_for_javadoc(change_detail): continue
+            if change_type == ChangeType.UPDATE.value:
                 search_res = re.search(REGEX_UPDATE, change_detail)
                 if search_res is None or search_res.lastindex < 2: continue
                 old_name, new_name = search_res.groups()
                 self.__core[old_name] = (ChangeType.UPDATE, new_name)
-            elif change_type is ChangeType.CREATE.value:
+            elif change_type == ChangeType.CREATE.value and is_for_method_or_class(change_detail):
                 search_res = re.search(REGEX_CREATE_OR_DELETE, change_detail)
                 if search_res is None or search_res.lastindex < 2: continue
                 method_name, content = search_res.groups()
                 self.__core[method_name] = (ChangeType.CREATE, content)
-            elif change_type is ChangeType.REMOVE.value:
+            elif change_type == ChangeType.REMOVE.value and is_for_method_or_class(change_detail):
                 search_res = re.search(REGEX_CREATE_OR_DELETE, change_detail)
                 if search_res is None or search_res.lastindex < 2: continue
                 method_name, content = search_res.groups()

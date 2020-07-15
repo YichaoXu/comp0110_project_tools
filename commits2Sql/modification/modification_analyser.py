@@ -1,8 +1,8 @@
 import os
 from typing import List
 
-from commits2Sql.modification.diff_analysis_report import AnalysisReport
-from commits2Sql.modification.driller_modification_extractor import ModificationExtractor
+from commits2sql.modification.diff_analysis_report import AnalysisReport
+from commits2sql.modification.driller_modification_extractor import ModificationExtractor
 
 FILENAME_AFTER = 'after'
 FILENAME_BEFORE = 'before'
