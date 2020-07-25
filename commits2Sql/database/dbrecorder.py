@@ -22,7 +22,9 @@ class DbRecorder(object):
         for old_id, new_id in id_pairs:
             self.__table_handler.for_changes_table.update_target_method(new_id, old_id)
             self.__table_handler.for_methods_table.delete_methods_by_id(new_id)
-        return self.__table_handler.for_methods_table.update_path(old_path, new_path)
+        self.__table_handler.for_methods_table.update_path(old_path, new_path)
+        self.__table_handler.for_methods_table.flash()
+        return None
 
     def record_rename_class(self, path: str, old_class: str, new_class: str) -> None:
         methods_table = self.__table_handler.for_methods_table
@@ -31,7 +33,9 @@ class DbRecorder(object):
         for old_id, new_id in id_pairs:
             change_table.update_target_method(new_id, old_id)
             methods_table.delete_methods_by_id(new_id)
-        return self.__table_handler.for_methods_table.update_class(path, old_class, new_class)
+        self.__table_handler.for_methods_table.update_class(path, old_class, new_class)
+        self.__table_handler.for_methods_table.flash()
+        return None
 
     def record_rename_method(self, method_id: int, new_name: str, commit_hash: str) -> None:
         methods_table = self.__table_handler.for_methods_table
@@ -41,7 +45,9 @@ class DbRecorder(object):
             change_table.update_target_method(new_id, old_id)
             methods_table.delete_methods_by_id(new_id)
         self.__table_handler.for_changes_table.insert_new_change("RENAME", method_id, commit_hash)
-        return self.__table_handler.for_methods_table.update_name(method_id, new_name)
+        self.__table_handler.for_methods_table.update_name(method_id, new_name)
+        self.__table_handler.for_methods_table.flash()
+        return None
 
     def get_method_id(self, method_name: str, class_name:str, path: str) -> int:
         return self.__table_handler.for_methods_table.select_method_id(method_name, class_name, path)

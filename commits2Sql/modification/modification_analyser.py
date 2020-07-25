@@ -1,5 +1,5 @@
 import os
-from typing import List
+from typing import List, Iterable
 
 from commits2sql.modification.diff_analysis_report import AnalysisReport
 from commits2sql.modification.driller_modification_extractor import ModificationExtractor
@@ -21,5 +21,5 @@ class ModificationAnalyser(object):
         with open(path_to_after, 'w') as f: f.write(code_after)
         return AnalysisReport(path_to_before, path_to_after)
 
-    def extract(self, method: List[str]) -> ModificationExtractor:
+    def extract(self, method: Iterable[str]) -> ModificationExtractor:
         return ModificationExtractor(method)

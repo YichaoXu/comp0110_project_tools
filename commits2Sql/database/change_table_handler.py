@@ -9,11 +9,11 @@ class ChangeStmtHolder(SqlStmtHolder):
         return """
             CREATE TABLE if NOT EXISTS changes (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                change_type VARCHAR(31) NOT NULL, 
+                change_type VARCHAR(32) NOT NULL, 
                 target_method_id INTEGER NOT NULL, 
-                commit_hash VARCHAR(63) NOT NULL, 
+                commit_hash VARCHAR(64) NOT NULL, 
                 FOREIGN KEY (target_method_id)  REFERENCES methods(id),
-                FOREIGN KEY (commit_hash)  REFERENCES commits(commit_hash)
+                FOREIGN KEY (commit_hash)  REFERENCES commits(hash_value) 
             );
         """
 
