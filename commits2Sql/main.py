@@ -2,9 +2,9 @@ from datetime import datetime
 
 from pydriller import RepositoryMining
 from pydriller.domain.commit import Modification
-from commits2sql.database import TableHandlerFactory, DbRecorder
+from commits2sql.database import TableHandlerFactory, Recorder
 from commits2sql.modification import ModificationAnalyser
-from commits2sql.modification.utils import ChangeType
+from modification.change_classfier.change_type import ChangeType
 
 
 class Main(object):
@@ -15,7 +15,7 @@ class Main(object):
     ):
         repos_name = repos_path.rpartition('/')[-1]
         self.__analyser = ModificationAnalyser(tmp_data_dir)
-        self.__recorder = DbRecorder(TableHandlerFactory(tmp_data_dir, repos_name))
+        self.__recorder = Recorder(TableHandlerFactory(tmp_data_dir, repos_name))
         self.__repository = RepositoryMining(repos_path, since=start_date, to=end_date)
 
     def mining(self):

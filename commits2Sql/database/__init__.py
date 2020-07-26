@@ -1,9 +1,7 @@
 
-__all__ = ['TableHandlerFactory', 'DbRecorder']
+__all__ = ['TableHandlerFactory', 'Recorder']
 
-from commits2sql.database.table_handler_factory import TableHandlerFactory
-from commits2sql.database.dbrecorder import DbRecorder
-
-
+from database.table_handler_factory import TableHandlerFactory
+from database.recorder import Recorder
 
 

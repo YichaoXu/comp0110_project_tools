@@ -1,8 +1,8 @@
 import os
-from typing import List, Iterable
+from typing import Iterable
 
-from commits2sql.modification.diff_analysis_report import AnalysisReport
-from commits2sql.modification.driller_modification_extractor import ModificationExtractor
+from modification.old_design.analysis_report import AnalysisReport
+from modification.old_design.pydriller_extractor import ModificationExtractor
 
 FILENAME_AFTER = 'after'
 FILENAME_BEFORE = 'before'

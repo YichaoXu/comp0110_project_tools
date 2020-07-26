@@ -6,6 +6,3 @@ class ChangeType(Enum):
     UPDATE = 'update-node'
     CREATE = 'insert-tree'
     REMOVE = 'delete-tree'
-
-    def __str__(self):
-        return self.value

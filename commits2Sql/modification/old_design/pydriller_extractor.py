@@ -1,4 +1,4 @@
-from typing import List, Dict, Iterable, Set
+from typing import Dict, Iterable, Set
 
 
 class ModificationExtractor(object):

@@ -1,10 +1,9 @@
 from datetime import datetime
 from typing import Any
+from database import TableHandlerFactory
 
-from commits2sql.database import TableHandlerFactory
 
-
-class DbRecorder(object):
+class Recorder(object):
 
     def __init__(self, handler_factory: TableHandlerFactory):
         self.__table_handler = handler_factory
