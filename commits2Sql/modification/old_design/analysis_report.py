@@ -1,7 +1,7 @@
 import re
 import subprocess
 from typing import Dict, Tuple
-from modification.change_classfier.change_type import ChangeType
+from modification.change_identifier.change_type import ChangeType
 
 CMD_DIFF = 'gumtree textdiff {before} {after}'
 

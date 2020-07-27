@@ -4,7 +4,7 @@ from pydriller import RepositoryMining
 from pydriller.domain.commit import Modification
 from commits2sql.database import TableHandlerFactory, Recorder
 from commits2sql.modification import ModificationAnalyser
-from modification.change_classfier.change_type import ChangeType
+from modification.change_identifier.change_type import ChangeType
 
 
 class Main(object):

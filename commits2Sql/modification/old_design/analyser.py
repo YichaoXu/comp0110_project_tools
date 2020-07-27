@@ -1,5 +1,6 @@
 import os
 from typing import Iterable
+import tempfile
 
 from modification.old_design.analysis_report import AnalysisReport
 from modification.old_design.pydriller_extractor import ModificationExtractor
@@ -12,7 +13,7 @@ class ModificationAnalyser(object):
 
     def __init__(self, tmp_path: str):
         os.makedirs(tmp_path, exist_ok=True)
-        self.__tmp_path = tmp_path
+        self.__tmp_path = tempfile.mkdtemp()
 
     def analyse(self, code_before: str, code_after: str, suffix: str) -> AnalysisReport:
         path_to_before = f'{self.__tmp_path}/{FILENAME_BEFORE}.{suffix}'
