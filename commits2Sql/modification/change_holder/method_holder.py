@@ -26,7 +26,6 @@ class MethodHolder(AbstractHolder):
                and (self.method_before.long_name == self.method_current.long_name)
 
     def is_changed(self) -> bool:
-        return (self.method_before is None) or (self.method_current is None) \
-               or (self.method_before.long_name != self.method_current.long_name)
+        return True
 
 

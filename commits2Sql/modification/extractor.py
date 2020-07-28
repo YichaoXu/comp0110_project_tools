@@ -19,6 +19,9 @@ class Extractor(object):
     def __init__(self, modification: Modification):
         self.__file = modification
 
+    def get_changed_file(self) -> FileHolder:
+        return self.__handle_file()
+
     def __handle_file(self) -> FileHolder:
         result = FileHolder(self.__file.old_path, self.__file.old_path)
         classes_dict_before = self.__collect_method(self.__file.methods_before)

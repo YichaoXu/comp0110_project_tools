@@ -1,7 +1,7 @@
 
 
-__all__ = ['AnalysisReport', 'ModificationExtractor', 'ModificationAnalyser']
+__all__ = ['Extractor']
 
-from modification.old_design.pydriller_extractor import ModificationExtractor
+from modification.extractor import Extractor
 
 
