@@ -7,9 +7,9 @@ from modification.change_holder.abstract_holder import AbstractHolder
 
 class MethodHolder(AbstractHolder):
 
-    def __init__(self):
-        self.method_before: Optional[Method] = None
-        self.method_current: Optional[Method] = None
+    def __init__(self, before: Optional[Method], current: Optional[Method]):
+        self.method_before: Optional[Method] = before
+        self.method_current: Optional[Method] = current
 
     def is_new(self) -> bool:
         return (self.method_before is None) and (self.method_current is not None)

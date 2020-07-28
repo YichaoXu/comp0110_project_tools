@@ -1,4 +1,4 @@
-from typing import Optional, Set
+from typing import Optional, Set, List
 
 from modification.change_holder.abstract_holder import AbstractHolder
 from modification.change_holder.method_holder import MethodHolder
@@ -6,10 +6,10 @@ from modification.change_holder.method_holder import MethodHolder
 
 class ClassHolder(AbstractHolder):
 
-    def __init__(self):
-        self.name_before: Optional[str] = None
-        self.name_current: Optional[str] = None
-        self.methods: Set[MethodHolder] = set()
+    def __init__(self, before:Optional[str], current: Optional[str]):
+        self.name_before: Optional[str] = before
+        self.name_current: Optional[str] = current
+        self.methods: List[MethodHolder] = list()
 
     def is_new(self) -> bool:
         return (self.name_before is None) and (self.name_current is not None)
