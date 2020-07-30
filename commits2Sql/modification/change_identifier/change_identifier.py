@@ -8,36 +8,41 @@ class ChangeIdentifier(object):
     __INSTANCE: Optional[object] = None
     __DIFFER: Optional[CodeDiffer] = None
     __CODE_BEFORE: Optional[str] = None
-    __CODE_AFTER: Optional[str] = None
+    __CODE_CURRENT: Optional[str] = None
 
     def __new__(cls, *args, **kw):
-        if cls.__INSTANCE is None: cls.__INSTANCE = object.__new__(cls, *args, **kw)
+        if cls.__INSTANCE is None: cls.__INSTANCE = object.__new__(cls)
         return cls.__INSTANCE
 
-    def __init__(self, code_before: str, code_after: str):
+    def __init__(self, code_before: str, code_current: str):
         if self.__DIFFER is None: self.__DIFFER = CodeDiffer()
-        if code_before == self.__CODE_BEFORE and code_after == self.__CODE_AFTER: return
-        exe_code, diff_output = self.__DIFFER.compare(code_before, code_after)
+        if code_before == self.__CODE_BEFORE and code_current == self.__CODE_CURRENT: return
+        exe_code, diff_output = self.__DIFFER.compare(code_before, code_current)
         if not exe_code == 0: raise Exception(f'FAIL TO EXECUTION DIFF {diff_output}')
         self.__CODE_BEFORE = code_before
-        self.__CODE_AFTER = code_after
+        self.__CODE_CURRENT = code_current
         self.__before = CodeAnalyser(code_before)
-        self.__after = CodeAnalyser(code_after)
-        self.__changed_char_num_dict = ChangeClassifier(diff_output).updated_char_num_dict
+        self.__current = CodeAnalyser(code_current)
+        self.__line_nums_dict: Dict[int, int] = dict()
+        classifier = ChangeClassifier(diff_output)
+        for old_char_num, new_char_num in classifier.match_char_num_dict.items():
+            old_line_num = self.__before.get_line_num(old_char_num)
+            new_line_num = self.__current.get_line_num(new_char_num)
+            self.__line_nums_dict[old_line_num] = new_line_num
+        return
 
     def __del__(self):
         del self.__DIFFER
 
     def new_classname_of(self, old_classname: str) -> Optional[str]:
-        start_char_num = self.__before.get_start_char_num_of_class_name(old_classname)
-        return self.__changed_char_num_dict[start_char_num] if start_char_num in self.__changed_char_num_dict else None
+        line_num_before = self.__before.get_line_num_of_class(old_classname)
+        if line_num_before not in self.__line_nums_dict:return None
+        line_num_current = self.__line_nums_dict[line_num_before]
+        return self.__current.get_classname_at_line(line_num_current)
 
     def new_lines_num_of(self, old_line_num: int) -> Optional[int]:
-        char_range = self.__before.get_char_num_range(old_line_num)
-        if char_range is None: return None
-        for char_before, char_current in self.__changed_char_num_dict.keys():
-            if char_range[0] <= char_before < char_range[1]: return self.__after.get_line_num(char_current)
-        return None
+        return self.__line_nums_dict[old_line_num] if old_line_num in self.__line_nums_dict else None
+
 
 
 

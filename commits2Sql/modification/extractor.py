@@ -13,8 +13,8 @@ from modification.change_identifier.change_identifier import ChangeIdentifier
 
 class Extractor(object):
 
-    __CLASS_METHOD_REGEX = r'^(?P<class_name>.*)::(?P<method_name>[^:<>]++(?:<.*>)?+\(.*\))\s*$'
-    __CLASS_NAME_REGEX = r'^(?P<superclass_name>.*)::(?P<class_name>[^:<>]++(?:<.*>)?+)\s*$'
+    __CLASS_METHOD_REGEX = r'^(?:(?P<class_name>.*)::)*(?P<method_name>\w+(?:<.*>)?\(.*\))$'
+    __CLASS_NAME_REGEX = r'^(?:(?P<super_name>.*)::)*(?P<class_name>\w+(?:<.*>)?)$'
 
     def __init__(self, modification: Modification):
         self.__file = modification
@@ -23,7 +23,7 @@ class Extractor(object):
         return self.__handle_file()
 
     def __handle_file(self) -> FileHolder:
-        result = FileHolder(self.__file.old_path, self.__file.old_path)
+        result = FileHolder(self.__file.old_path, self.__file.new_path)
         classes_dict_before = self.__collect_method(self.__file.methods_before)
         classes_dict_current = self.__collect_method(self.__file.methods)
         classes_dict_changed = self.__collect_method(self.__file.changed_methods)
@@ -34,12 +34,12 @@ class Extractor(object):
         )
         removed_classnames, created_classnames, unrenamed_classnames, renamed_classnames = classified_classnames
         for classname in removed_classnames:
-            methods = classes_dict_changed[classname]
+            methods = classes_dict_before[classname]
             new_class_holder = ClassHolder(classname, None)
             for each in methods: new_class_holder.methods.append(MethodHolder(each, None))
             result.classes.append(new_class_holder)
         for classname in created_classnames:
-            methods = classes_dict_changed[classname]
+            methods = classes_dict_current[classname]
             new_class_holder = ClassHolder(None, classname)
             for each in methods: new_class_holder.methods.append(MethodHolder(None, each))
             result.classes.append(new_class_holder)
@@ -57,13 +57,17 @@ class Extractor(object):
                 new_class_holder.methods.append(MethodHolder(None, methods_current[name]))
             for name in unrenamed_methodnames:
                 new_class_holder.methods.append(MethodHolder(methods_before[name], methods_current[name]))
-            for before_name, after_name in renamed_methodnames:
+            for before_name, after_name in renamed_methodnames.items():
                 new_class_holder.methods.append(MethodHolder(methods_before[before_name], methods_current[after_name]))
-        for classname_before, classname_current in renamed_classnames:
+            result.classes.append(new_class_holder)
+        for classname_before, classname_current in renamed_classnames.items():
             methods_before = self.__from_methods_to_name_dict(classes_dict_before[classname_before])
             methods_current = self.__from_methods_to_name_dict(classes_dict_current[classname_current])
-            changed_methods = classes_dict_changed[classname_before] + classes_dict_changed[classname_current]
-            methods_changed = self.__from_methods_to_name_dict(changed_methods)
+            methods_changed = self.__from_methods_to_name_dict(
+                classes_dict_changed[classname_before] if classname_before in classes_dict_changed else list()
+                +
+                classes_dict_changed[classname_current] if classname_current in classes_dict_changed else list()
+            )
             classified_names = self.__classify_methods(methods_before, methods_current, methods_changed)
             removed_methodnames, created_methodnames, unrenamed_methodnames, renamed_methodnames = classified_names
             new_class_holder = ClassHolder(classname_before, classname_current)
@@ -75,13 +79,17 @@ class Extractor(object):
                 new_class_holder.methods.append(MethodHolder(methods_before[name], methods_current[name]))
             for before_name, after_name in renamed_methodnames:
                 new_class_holder.methods.append(MethodHolder(methods_before[before_name], methods_current[after_name]))
+            result.classes.append(new_class_holder)
         return result
 
-    def __collect_method(self, methods: List[Method]) -> Dict[str:List[Method]]:
+    def __collect_method(self, methods: List[Method]) -> Dict[str, List[Method]]:
         output: Dict[str:List[Method]] = dict()
         for method in methods:
-            match_names = re.match(self.__CLASS_METHOD_REGEX, method.long_name).groupdict()
-            class_name = match_names['class_name']
+            match = re.match(self.__CLASS_METHOD_REGEX, method.long_name)
+            if match is None:
+                logging.warning(f'method name {method.long_name} is not formatted as expected (ClassName).')
+            match_names = match.groupdict()
+            class_name = match_names['class_name'] if 'class_name' in match_names else 'None'
             class_methods = output[class_name] if class_name in output else list()
             class_methods.append(method)
             output[class_name] = class_methods
@@ -96,32 +104,36 @@ class Extractor(object):
         unrenamed = (before & current)  # MD(Non-RN), Non-MD (Non-RN)
         removed_and_old = before - unrenamed  # RN_old(MD, Non-MD), RM
         created_and_new = current - unrenamed  # RN_new(MD, Non-MD), CT
-        removed = changed - (unrenamed | created_and_new)  # RM
-        old = removed_and_old - removed  # RN_old(MD, Non-MD)
         renamed: Dict[str, str] = dict()
-        if len(old) == 0: return removed, created_and_new, unrenamed, renamed
+        if len(removed_and_old) == 0 or len(created_and_new) == 0:
+            return removed_and_old, created_and_new, unrenamed, renamed
         identifier = ChangeIdentifier(self.__file.source_code_before, self.__file.source_code)
-        old_list = list(old)
+        old_list = list(removed_and_old)
         old_list.sort(key=lambda it: len(it))
         for old_name in old_list:
             match = re.match(self.__CLASS_NAME_REGEX, old_name)
-            if match is None: continue
-            match_names = match.groupdict()
-            if 'class_name' not in match_names or 'superclass_name' not in match_names: continue
-            class_name, super_name = match_names['class_name'], match_names['superclass_name']
-            new_class_name = identifier.new_classname_of(old_name)
-            if new_class_name is None:
-                removed.add(old_name)
-                logging.error(f'UNEXPECTED: {old_name} is renamed, but cannot find its new name (Handled as removed).')
-                continue
-            super_name = renamed[super_name] if super_name in renamed else super_name
-            new_name = f'{super_name}::{new_class_name}'
+            if match is None or 'class_name' not in match.groupdict(): continue
+            old_class_name = match.group('class_name')
+            old_super_name = match.group('super_name') if 'super_name' in match.groupdict() else None
+            new_class_name = identifier.new_classname_of(old_class_name)
+            if new_class_name is None: continue
+            new_super_name = renamed[old_super_name] if old_super_name in renamed else old_super_name
+            new_name = f'{new_super_name}::{new_class_name}' if new_super_name is not None else new_class_name
+            if new_name == old_name:
+                for any_name in created_and_new:
+                    match = re.match(self.__CLASS_NAME_REGEX, any_name)
+                    if match is None or 'class_name' not in match.groupdict(): continue
+                    tmp_class_name = match.group('class_name')
+                    if tmp_class_name == new_name:
+                        new_name = any_name
+                        break
             if new_name not in created_and_new:
-                logging.error(f'UNEXPECTED: {new_name} is expected new name of {old_name} (Handled as added).')
+                logging.warning(f'class {new_name} was expected new name {old_name} (Now handled as added).')
                 continue
+            removed_and_old.remove(old_name)
             created_and_new.remove(new_name)
             renamed[old_name] = new_name
-        return removed, created_and_new, unrenamed, renamed
+        return removed_and_old, created_and_new, unrenamed, renamed
 
     def __from_methods_to_name_dict(self, methods: List[Method]):
         output: Dict[str:Method] = dict()
@@ -142,22 +154,20 @@ class Extractor(object):
         names_unrenamed = (names_before & names_current)  # MD(Non-RN), Non-MD (Non-RN)
         names_removed_and_old = names_before - names_unrenamed  # RN_old(MD, Non-MD), RM
         names_created_and_new = names_current - names_unrenamed  # RN_new(MD, Non-MD), CT
-        names_removed = names_changed - (names_unrenamed | names_created_and_new)  # RM
-        old = names_removed_and_old - names_removed  # RN_old(MD, Non-MD)
         names_renamed: Dict[str, str] = dict()
-        if len(old) == 0: return names_removed, names_created_and_new, names_unrenamed&names_changed, names_renamed
+        if len(names_removed_and_old) == 0 or len(names_created_and_new) == 0:
+            return names_removed_and_old, names_created_and_new, names_unrenamed & names_changed, names_renamed
         identifier = ChangeIdentifier(self.__file.source_code_before, self.__file.source_code)
-        for old_name in old:
+        for old_name in names_removed_and_old.copy():
             new_method_start_line = identifier.new_lines_num_of(before[old_name].start_line)
             new_name: Optional[str] = None
             for name in names_created_and_new:
+                if new_name is not None: break
+                if name not in changed: continue
                 if changed[name].start_line != new_method_start_line: continue
                 new_name = name
-                break
-            if new_name is None:
-                names_removed.add(old_name)
-                logging.error(f'UNEXPECTED: {old_name} is renamed, but cannot find its new name (Handled as removed).')
-                continue
+            if new_name is None: continue
             names_renamed[old_name] = new_name
+            names_removed_and_old.remove(old_name)
             names_created_and_new.remove(new_name)
-        return names_removed, names_created_and_new, names_unrenamed & names_changed, names_renamed
+        return names_removed_and_old, names_created_and_new, names_unrenamed & names_changed, names_renamed

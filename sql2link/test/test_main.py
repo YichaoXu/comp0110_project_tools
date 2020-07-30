@@ -1,8 +1,14 @@
 import os
-import sql2link.main
+from sql2link.main import *
 
-path_to_comp0110 = os.path.expanduser('~/Project/PycharmProjects/comp0110')
-path_to_data = f'{path_to_comp0110}/.tmp'
-path_to_repository = f'{path_to_comp0110}/example_repositories/commons-lang'
+if __name__ == '__main__':
+    path_to_comp0110 = os.path.expanduser('~/Project/PycharmProjects/comp0110')
+    sql2linker = Main(f'{path_to_comp0110}/.tmp/commons_lang.db')
+    sql2linker.run(LinkStrategy.COCREATE, LinkBase.FOR_COMMITS)
+    sql2linker.run(LinkStrategy.COCHANGE, LinkBase.FOR_COMMITS)
+    sql2linker.run(LinkStrategy.APRIORI, LinkBase.FOR_COMMITS, {
+        'min_support_for_change': 5, 'min_support_for_cochange': 2, 'min_confidence': 0.4
+    })
+    sql2linker.run(LinkStrategy.COCREATE, LinkBase.FOR_WEEKS)
 
-sql2link.main.strategy_three(path_to_data, 'commons-lang')
+

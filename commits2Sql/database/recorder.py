@@ -1,9 +1,12 @@
+import re
 from datetime import datetime
-from typing import Any
+from typing import Any, Optional
 from database import TableHandlerFactory
 
 
 class Recorder(object):
+
+    __CLASS_METHOD_REGEX = r'^(?:(?P<class_name>.*)::)*(?P<method_name>\w+(?:<.*>)?\(.*\))$'
 
     def __init__(self, handler_factory: TableHandlerFactory):
         self.__table_handler = handler_factory
@@ -22,7 +25,6 @@ class Recorder(object):
             self.__table_handler.for_changes_table.update_target_method(new_id, old_id)
             self.__table_handler.for_methods_table.delete_methods_by_id(new_id)
         self.__table_handler.for_methods_table.update_path(old_path, new_path)
-        self.__table_handler.for_methods_table.flash()
         return None
 
     def record_rename_class(self, path: str, old_class: str, new_class: str) -> None:
@@ -33,22 +35,25 @@ class Recorder(object):
             change_table.update_target_method(new_id, old_id)
             methods_table.delete_methods_by_id(new_id)
         self.__table_handler.for_methods_table.update_class(path, old_class, new_class)
-        self.__table_handler.for_methods_table.flash()
         return None
 
     def record_rename_method(self, method_id: int, new_name: str, commit_hash: str) -> None:
+        match_names = re.match(self.__CLASS_METHOD_REGEX, new_name).groupdict()
+        method_name = match_names['method_name'].replace('( ', '(', 1).replace(' ,', ',')
         methods_table = self.__table_handler.for_methods_table
         change_table = self.__table_handler.for_changes_table
-        id_pairs = methods_table.find_crash_rows_of_method_rename(method_id, new_name)
+        id_pairs = methods_table.find_crash_rows_of_method_rename(method_id, method_name)
         for old_id, new_id in id_pairs:
             change_table.update_target_method(new_id, old_id)
             methods_table.delete_methods_by_id(new_id)
         self.__table_handler.for_changes_table.insert_new_change("RENAME", method_id, commit_hash)
-        self.__table_handler.for_methods_table.update_name(method_id, new_name)
-        self.__table_handler.for_methods_table.flash()
+        self.__table_handler.for_methods_table.update_name(method_id, method_name)
         return None
 
-    def get_method_id(self, method_name: str, class_name:str, path: str) -> int:
+    def get_method_id(self, method_name: str, class_name: Optional[str], path: str) -> int:
+        match_names = re.match(self.__CLASS_METHOD_REGEX, method_name).groupdict()
+        method_name = match_names['method_name'].replace('( ', '(', 1).replace(' ,', ',')
+        if class_name is None: class_name = '' # The class name is Null because of the PyDriller
         return self.__table_handler.for_methods_table.select_method_id(method_name, class_name, path)
 
     def record_remove_method(self, method_id: int, commit_hash: str) -> int:
