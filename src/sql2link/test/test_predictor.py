@@ -12,7 +12,7 @@ if __name__ == '__main__':
     sql2linker.run(LinkStrategy.COCREATE, LinkBase.FOR_WEEKS)
     sql2linker.run(LinkStrategy.COCHANGE, LinkBase.FOR_WEEKS)
     sql2linker.run(LinkStrategy.APRIORI, LinkBase.FOR_WEEKS, {
-        'min_support_for_change': 2, 'min_support_for_cochange': 1, 'min_confidence': 0.5
+        'min_support_for_change': 4, 'min_support_for_cochange': 2, 'min_confidence': 0.3
     })
 
 

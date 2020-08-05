@@ -4,18 +4,25 @@ from evaluator4link.measurements.utils import AbsMethodNameExtractor
 
 class GroundTruthMethodName(AbsMethodNameExtractor):
 
-    __GT_CLASS_METHOD_NAME_REGEX = r'^(?P<sub_path>[a-z.\d]+)\.' \
+    __INIT_NAME_REPLAY_REGEX = (
+        r"(?P<name>\w+?)\.(?P<init_fun><init>\()",
+        r"\g<name>.\g<name>("
+    )
+
+    __CLASS_METHOD_NAME_REGEX = r'^(?P<sub_path>[a-z.\d]+)\.' \
                                  r'(?P<class_names>[\w.]+)\.' \
                                  r'(?P<method_signature>(?P<simple_name>\w+)?(?:<.+>)?\(.*\))'
-    __GT_SUPER_PACKAGE_NAME_REGEX = r'(?P<super_name>[^,(<>]*\.)'
+
+    __SUPER_PACKAGE_NAME_REGEX = r'(?P<super_name>[^,(<>]*\.)'
 
     def __init__(self, long_name: str):
+        long_name = re.sub(self.__INIT_NAME_REPLAY_REGEX[0], self.__INIT_NAME_REPLAY_REGEX[1], long_name)
         self.__long_name = long_name
-        match = re.match(self.__GT_CLASS_METHOD_NAME_REGEX, long_name)
+        match = re.match(self.__CLASS_METHOD_NAME_REGEX, long_name)
         match_names = match.groupdict()
         self.__file_path = match_names['sub_path'].replace('.', '/')
         self.__class_name = match_names['class_names'].replace('.', '::')
-        signature_match = re.sub(self.__GT_SUPER_PACKAGE_NAME_REGEX, '', match_names['method_signature'])
+        signature_match = re.sub(self.__SUPER_PACKAGE_NAME_REGEX, '', match_names['method_signature'])
         self.__signature = signature_match.replace(' ', '')
         self.__simple_name = match_names['simple_name']
 

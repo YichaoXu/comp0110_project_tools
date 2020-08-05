@@ -7,35 +7,6 @@ from evaluator4link.measurements.utils import GroundTruthMethodName, DatabaseMet
 
 class CoChangedDataMeasurement(AbstractMeasurement):
 
-
-    __SELECT_ALL_CANDIDATE_SQL = '''
-        WITH alive_methods AS (
-            SELECT id, simple_name AS name, class_name, file_path FROM methods
-            WHERE NOT EXISTS(
-                SELECT target_method_id FROM changes
-                WHERE change_type = 'REMOVE' and target_method_id = id
-            )
-        ), candidate_test AS (
-            SELECT id, name FROM alive_methods
-            WHERE name LIKE :test_simple_name 
-            AND class_name = :test_class 
-            AND file_path LIKE :test_path
-        ), candidate_tested AS (
-            SELECT id, name FROM alive_methods
-            WHERE name LIKE :tested_simple_name 
-            AND class_name = :tested_class 
-            AND file_path LIKE :tested_path
-        )
-        SELECT candidate_test.name,candidate_tested.name FROM (
-            candidate_test JOIN candidate_tested
-            ON EXISTS(
-                SELECT * FROM {strategy}
-                WHERE tested_method_id = candidate_tested.id
-                AND test_method_id = candidate_test.id
-            )
-        )
-    '''
-
     __SELECT_CANDIDATE_ID_SQL = '''
         WITH alive_methods AS (
             SELECT id, simple_name, class_name, file_path FROM methods
@@ -44,43 +15,56 @@ class CoChangedDataMeasurement(AbstractMeasurement):
                 WHERE change_type = 'REMOVE' AND target_method_id = id
             )
             AND simple_name NOT IN ('main(String [ ] args)', 'suite()', 'setUp()', 'tearDown()')
-            AND simple_name NOT LIKE (class_name || '%') AND simple_name NOT LIKE ('for(int i%')
+            AND simple_name NOT LIKE ('for(int i%')
         )
         SELECT id, simple_name FROM alive_methods
         WHERE simple_name LIKE :simple_name
-        AND class_name = :class_name
+        AND class_name LIKE :class_name
         AND file_path LIKE :file_path
     '''
 
-    __SELECT_PREDICT_FOR_CLASS = '''
-        WITH method_for_class AS (
-            SELECT id FROM methods
-            WHERE class_name = :class_name
-            AND file_path LIKE :file_path
+    __SELECT_PREDICT_FOR_SAME_TESTED_CLASS = '''
+        WITH alive_methods AS (
+            SELECT id, simple_name, class_name, file_path FROM methods
+            WHERE NOT EXISTS(
+                SELECT target_method_id FROM changes
+                WHERE change_type = 'REMOVE' AND target_method_id = id
+            )
+            AND simple_name NOT IN ('main(String [ ] args)', 'suite()', 'setUp()', 'tearDown()')
+            AND simple_name NOT LIKE ('for(int i%')
+        ), tested_class_name_path AS (
+            SELECT class_name, file_path FROM alive_methods
+            WHERE id = :method_id
+        ), tested_methods_in_same_class AS (
+            SELECT id FROM (
+                tested_class_name_path JOIN alive_methods
+                ON alive_methods.class_name = tested_class_name_path.class_name
+                AND alive_methods.file_path = tested_class_name_path.file_path
+            )
         )
         SELECT tested_method_id, test_method_id, confidence_num FROM {strategy}
-        WHERE tested_method_id IN method_for_class 
-        OR test_method_id IN method_for_class
+        WHERE tested_method_id IN tested_methods_in_same_class
     '''
 
     def __init__(self, path_to_db: str, path_to_csv: str, for_strategy: str):
         self.__strategy_name = for_strategy
-        self.__predict_links: Dict[Tuple[int, int], float] = dict()
-        self.__ground_truth_links: Dict[Tuple[int, int], float] = dict()
+        self._predict_links: Dict[Tuple[int, int], float] = dict()
+        self._ground_truth_links: Dict[Tuple[int, int], float] = dict()
+        self._valid_predict_links: Dict[Tuple[int, int], float] = dict()
         super().__init__(path_to_db, path_to_csv)
 
     def _measure(self) -> None:
-        test_and_tested_classes = set()
         for row in self._ground_truth_pandas.itertuples():
             test, tested = GroundTruthMethodName(row[1]), GroundTruthMethodName(row[2])
-            test_and_tested_classes.add((test.class_name, test.file_path))
-            test_and_tested_classes.add((tested.class_name, tested.file_path))
-            test_id = self.__get_method_id_by_(test)
-            tested_id = self.__get_method_id_by_(tested)
-            self.__ground_truth_links[(test_id, tested_id)] = 1.0
-        for (class_name, file_path) in test_and_tested_classes:
-            links_for_class = self.__get_predicate_links_for_class(class_name, file_path)
-            self.__predict_links.update(links_for_class)
+            test_id, tested_id = self.__get_method_id_by_(test), self.__get_method_id_by_(tested)
+            self._ground_truth_links[(tested_id, test_id)] = 1.0
+        for (tested_id, test_id) in self._ground_truth_links.keys():
+            links_for_class = self.__get_predicate_links_for_same_class(tested_id)
+            self._predict_links.update(links_for_class)
+        predicted_links_set = set(self._predict_links.keys())
+        ground_truth_links_set = set(self._ground_truth_links.keys())
+        valid_predict_links_set = predicted_links_set.intersection(ground_truth_links_set)
+        self._valid_predict_links = {names: self._predict_links[names] for names in valid_predict_links_set}
         return None
 
     def __get_method_id_by_(self, gt_name: GroundTruthMethodName) -> Optional[int]:
@@ -88,18 +72,30 @@ class CoChangedDataMeasurement(AbstractMeasurement):
         select_sql = self.__SELECT_CANDIDATE_ID_SQL.format(strategy=self.__strategy_name)
         candidates_methods = cursor.execute(select_sql, {
             'simple_name': f'{gt_name.simple_name}%',
-            'class_name': gt_name.class_name,
-            'test_path': f'%{gt_name.file_path}%',
+            'class_name': f'{gt_name.class_name.replace("::", "%::")}%',
+            'file_path': f'%{gt_name.file_path}%',
         })
         for method_id, long_name in candidates_methods.fetchall():
             if DatabaseMethodName(long_name).signature == gt_name.signature: return method_id
-        logging.warning(f'cannot find {gt_name.signature} out from the database. ')
+        logging.warning(f'cannot find out method "{gt_name.long_name()}" from the database. ')
         return None
 
-    def __get_predicate_links_for_class(self, name:str, path: str) -> Dict[Tuple[int, int], float]:
+    def __get_predicate_links_for_same_class(self, id: int) -> Dict[Tuple[int, int], float]:
         output = dict()
         cursor = self._predict_database.cursor()
-        select_sql = self.__SELECT_PREDICT_FOR_CLASS.format(strategy=self.__strategy_name)
-        all_links = cursor.execute(select_sql, {'class_name': name,'file_path': f'%{path}%'}).fetchall()
-        for test_id, tested_id, confidence_num in all_links: output[(test_id, tested_id)] = confidence_num
+        select_sql = self.__SELECT_PREDICT_FOR_SAME_TESTED_CLASS.format(strategy=self.__strategy_name)
+        all_links = cursor.execute(select_sql, {'method_id': id}).fetchall()
+        for tested_id, test_id, confidence_num in all_links: output[(tested_id, test_id)] = confidence_num
         return output
+
+    @property
+    def predict_links(self) -> Dict[Tuple[int, int], float]:
+        return self._predict_links
+
+    @property
+    def ground_truth_links(self) -> Dict[Tuple[int, int], float]:
+        return self._ground_truth_links
+
+    @property
+    def valid_predict_links(self) -> Dict[Tuple[int, int], float]:
+        return self._valid_predict_links
