@@ -39,34 +39,30 @@ class AprioriInCommitLinkEstablisher(AbsLinkEstablisher):
     @property
     def _link_establishing_sql(self) -> str:
         return '''
-        WITH alive_methods AS (
+        WITH valid_methods AS (
             SELECT id, file_path FROM methods
-            WHERE NOT EXISTS(
-                SELECT target_method_id FROM changes
-                WHERE change_type = 'REMOVE' AND target_method_id = id
-            )
-            AND simple_name NOT IN ('main(String [ ] args)', 'suite()', 'setUp()', 'tearDown()')
-            AND simple_name NOT LIKE (class_name || '%') AND simple_name NOT LIKE ('for(int i%')
+            WHERE simple_name NOT LIKE ('if(%')
+            AND simple_name NOT LIKE ('for(int i%')
         ), frequent_unique_table AS (
             SELECT target_method_id AS id, COUNT(commit_hash) AS support FROM main.changes
-            WHERE EXISTS(SELECT id FROM alive_methods WHERE target_method_id = id)
-            GROUP BY target_method_id HAVING support > :min_support_for_change
+            WHERE EXISTS(
+                SELECT id FROM valid_methods WHERE target_method_id = id
+            ) GROUP BY target_method_id
         ),
         frequent_test_table AS (
             SELECT id AS test_id, support AS test_support FROM frequent_unique_table
             WHERE EXISTS( 
                 SELECT id FROM methods 
-                WHERE id = test_id 
-                AND file_path LIKE  'src/test/java/org/apache/commons/lang3/%'
-            )
+                WHERE id = test_id AND file_path LIKE  'src/test/java/org/apache/commons/lang3/%'
+            ) 
         ),
         frequent_tested_table AS (
             SELECT id AS tested_id, support AS tested_support FROM frequent_unique_table
             WHERE EXISTS( 
                 SELECT id FROM methods 
-                WHERE id = tested_id 
-                AND file_path LIKE 'src/main/java/org/apache/commons/lang3/%'
-            )
+                WHERE id = tested_id AND file_path LIKE 'src/main/java/org/apache/commons/lang3/%'
+            ) 
+            AND support > :min_support_for_change
         ),
         frequent_test_commits AS (
             SELECT commit_hash AS test_commit_hash, test_id, test_support

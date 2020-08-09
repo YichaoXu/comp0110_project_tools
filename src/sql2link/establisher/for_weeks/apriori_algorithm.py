@@ -42,20 +42,16 @@ class AprioriInWeekLinkEstablisher(AbsLinkEstablisher):
         WITH week_commit_table AS (
             SELECT STRFTIME('%Y-%W', commit_date)  AS week, hash_value AS commit_hash  FROM git_commits
         ),
-        alive_methods AS (
+        valid_methods AS (
             SELECT id, file_path FROM methods
-            WHERE NOT EXISTS(
-                SELECT target_method_id FROM changes
-                WHERE change_type = 'REMOVE' AND target_method_id = id
-            )
-            AND simple_name NOT IN ('main(String [ ] args)', 'suite()', 'setUp()', 'tearDown()')
-            AND simple_name NOT LIKE (class_name || '%') AND simple_name NOT LIKE ('for(int i%')
+            WHERE simple_name NOT LIKE ('if(%')
+            AND simple_name NOT LIKE ('for(int i%')  
         ),
         modified_week_table AS (
             SELECT target_method_id, week AS change_week, file_path FROM (
-                changes JOIN week_commit_table JOIN alive_methods
+                changes JOIN week_commit_table JOIN valid_methods
                 ON changes.commit_hash = week_commit_table.commit_hash
-                AND changes.target_method_id = alive_methods.id
+                AND changes.target_method_id = valid_methods.id
             )
             GROUP BY target_method_id, change_week
         ),
@@ -73,7 +69,7 @@ class AprioriInWeekLinkEstablisher(AbsLinkEstablisher):
         ),
         frequent_test AS (
             SELECT test_method_id, COUNT(*) AS support FROM test_modified
-            GROUP BY test_method_id HAVING support > :min_support_for_change
+            GROUP BY test_method_id
         ),
         co_changed AS (
             SELECT tested_method_id, test_method_id, COUNT(*) AS support FROM (

@@ -2,7 +2,7 @@ from typing import Optional, List
 
 from pydriller.domain.commit import Method
 
-from modification.change_holder.abstract_holder import AbstractHolder
+from commits2sql.modification.change_holder.abstract_holder import AbstractHolder
 
 
 class MethodHolder(AbstractHolder):

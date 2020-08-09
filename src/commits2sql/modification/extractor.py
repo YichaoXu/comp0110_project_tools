@@ -59,11 +59,9 @@ class Extractor(object):
         for classname_before, classname_current in renamed_classnames.items():
             methods_before = self.__from_methods_to_name_dict(classes_dict_before[classname_before])
             methods_current = self.__from_methods_to_name_dict(classes_dict_current[classname_current])
-            methods_changed = self.__from_methods_to_name_dict(
-                classes_dict_changed[classname_before] if classname_before in classes_dict_changed else list()
-                +
-                classes_dict_changed[classname_current] if classname_current in classes_dict_changed else list()
-            )
+            changed_before = classes_dict_changed[classname_before] if classname_before in classes_dict_changed else []
+            changed_current = classes_dict_changed[classname_current] if classname_current in classes_dict_changed else []
+            methods_changed = self.__from_methods_to_name_dict(changed_before + changed_current)
             classified_names = self.__classify_methods(methods_before, methods_current, methods_changed)
             removed_methodnames, created_methodnames, unrenamed_methodnames, renamed_methodnames = classified_names
             new_class_holder = ClassHolder(classname_before, classname_current)
@@ -73,7 +71,7 @@ class Extractor(object):
                 new_class_holder.methods.append(MethodHolder(None, methods_current[name]))
             for name in unrenamed_methodnames:
                 new_class_holder.methods.append(MethodHolder(methods_before[name], methods_current[name]))
-            for before_name, after_name in renamed_methodnames:
+            for before_name, after_name in renamed_methodnames.items():
                 new_class_holder.methods.append(MethodHolder(methods_before[before_name], methods_current[after_name]))
             result.classes.append(new_class_holder)
         return result
@@ -92,25 +90,22 @@ class Extractor(object):
         return output
 
     def __classify_classnames(
-            self,
-            before: Set[str], # MD(RN_old, Non-RN), Non-MD(RN_old, Non-RN), RM
-            current: Set[str], # MD(RN_new, Non-RN), Non-MD(RN_new, Non-RN), CT
-            changed: Set[str] # RM, CT, MD(RN_new, Non-RN)
+            self, before: Set[str], current: Set[str], changed: Set[str]
     ) -> Tuple[Set[str], Set[str], Set[str], Dict[str, str]]:
         unrenamed = (before & current)  # MD(Non-RN), Non-MD (Non-RN)
         removed_and_old = before - unrenamed  # RN_old(MD, Non-MD), RM
         created_and_new = current - unrenamed  # RN_new(MD, Non-MD), CT
         renamed: Dict[str, str] = dict()
         if len(removed_and_old) == 0 or len(created_and_new) == 0:
-            return removed_and_old, created_and_new, unrenamed, renamed
+            return removed_and_old, created_and_new, changed & unrenamed, renamed
         identifier = ChangeIdentifier(self.__file.source_code_before, self.__file.source_code)
-        old_list = list(removed_and_old)
-        old_list.sort(key=lambda it: len(it))
+        old_list = sorted(removed_and_old, key=lambda it: len(it))
         for old_name in old_list:
             match = re.match(self.__CLASS_NAME_REGEX, old_name)
             if match is None or 'class_name' not in match.groupdict(): continue
-            old_class_name = match.group('class_name')
-            old_super_name = match.group('super_name') if 'super_name' in match.groupdict() else None
+            match_names = match.groupdict()
+            old_class_name = match_names['class_name']
+            old_super_name = match_names['super_name'] if 'super_name' in match_names else None
             new_class_name = identifier.new_classname_of(old_class_name)
             if new_class_name is None: continue
             new_super_name = renamed[old_super_name] if old_super_name in renamed else old_super_name
@@ -120,16 +115,15 @@ class Extractor(object):
                     match = re.match(self.__CLASS_NAME_REGEX, any_name)
                     if match is None or 'class_name' not in match.groupdict(): continue
                     tmp_class_name = match.group('class_name')
-                    if tmp_class_name == new_name:
-                        new_name = any_name
-                        break
+                    if tmp_class_name == new_name: new_name = any_name
+                    if new_name == any_name: break
             if new_name not in created_and_new:
                 logging.warning(f'class {new_name} was expected new name {old_name} (Now handled as added).')
                 continue
             removed_and_old.remove(old_name)
             created_and_new.remove(new_name)
             renamed[old_name] = new_name
-        return removed_and_old, created_and_new, unrenamed, renamed
+        return removed_and_old, created_and_new, changed & unrenamed, renamed
 
     def __from_methods_to_name_dict(self, methods: List[Method]):
         output: Dict[str:Method] = dict()
@@ -140,9 +134,7 @@ class Extractor(object):
         return output
 
     def __classify_methods(self,
-        before: Dict[str, Method],
-        current: Dict[str, Method],
-        changed: Dict[str, Method]
+        before: Dict[str, Method], current: Dict[str, Method], changed: Dict[str, Method]
     ) -> Tuple[Set[str], Set[str], Set[str], Dict[str, str]]:
         names_before = set(before.keys()) # MD(RN_old, Non-RN), Non-MD(RN_old, Non-RN), RM
         names_current = set(current.keys()) # MD(RN_new, Non-RN), Non-MD(RN_new, Non-RN), CT

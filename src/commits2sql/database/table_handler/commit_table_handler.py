@@ -1,10 +1,9 @@
 from datetime import datetime
 from sqlite3 import Connection
+from commits2sql.database.table_handler import AbsSqlStmtHolder, AbsTableHandler
 
-from database.table_handler.abs_table_handler import SqlStmtHolder, AbsTableHandler
 
-
-class CommitStmtHolder(SqlStmtHolder):
+class CommitStmtHolder(AbsSqlStmtHolder):
 
     def create_db_stmt(self) -> str:
         return """

@@ -4,10 +4,18 @@ from evaluator4link.measurements.utils import AbsMethodNameExtractor
 
 class DatabaseMethodName(AbsMethodNameExtractor):
 
-    __FINAL_KEYWORDS_SUB_REGEX = (r'final\s', '')
-    __INHERITANCE_KEYWORDS_SUB_REGEX = (r'(extends|implements)\s\w+', '')
-    __VAR_LENGTH_PARAMETER_SUB_REGEX = (r'(\.{3})', '[]')
-    __PARAMETER_NAMES_SUB_REGEX = (r'(\s+[a-z]\S+\s*)(,|\))', '\\2')
+    __FINAL_KEYWORDS_SUB_REGEX = (
+        r'final\s', ''
+    )
+    __INHERITANCE_KEYWORDS_SUB_REGEX = (
+        r'(extends|implements)\s\w+', ''
+    )
+    __VAR_LENGTH_PARAMETER_SUB_REGEX = (
+        r'(\.{3})', '[]'
+    )
+    __PARAMETER_NAMES_SUB_REGEX = (
+        r'(\s+[a-z]\S+\s*)(,|\))', '\\2'
+    )
     __SIMPLE_NAME_MATCH_REGEX = r'(?P<name>\w+(<.+>)?)\('
 
     def __init__(self, long_name):

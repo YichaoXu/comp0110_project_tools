@@ -42,7 +42,7 @@ class DataMiner(object):
                     self.__recorder.record_add_method(new_id, commit_hash)
                 elif method.is_deleted():
                     before_id = self.__recorder.get_method_id(method.method_before.long_name, class_name, path)
-                    self.__recorder.record_remove_method(before_id, commit_hash)
+                    self.__recorder.record_remove_method(before_id)
                 elif method.is_modified():
                     method_id = self.__recorder.get_method_id(method.method_before.long_name, class_name, path)
                     self.__recorder.record_modify_method(method_id, commit_hash)

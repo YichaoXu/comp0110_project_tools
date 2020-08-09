@@ -23,27 +23,9 @@ class CoChangedDataMeasurement(AbstractMeasurement):
         AND file_path LIKE :file_path
     '''
 
-    __SELECT_PREDICT_FOR_SAME_TESTED_CLASS = '''
-        WITH alive_methods AS (
-            SELECT id, simple_name, class_name, file_path FROM methods
-            WHERE NOT EXISTS(
-                SELECT target_method_id FROM changes
-                WHERE change_type = 'REMOVE' AND target_method_id = id
-            )
-            AND simple_name NOT IN ('main(String [ ] args)', 'suite()', 'setUp()', 'tearDown()')
-            AND simple_name NOT LIKE ('for(int i%')
-        ), tested_class_name_path AS (
-            SELECT class_name, file_path FROM alive_methods
-            WHERE id = :method_id
-        ), tested_methods_in_same_class AS (
-            SELECT id FROM (
-                tested_class_name_path JOIN alive_methods
-                ON alive_methods.class_name = tested_class_name_path.class_name
-                AND alive_methods.file_path = tested_class_name_path.file_path
-            )
-        )
+    __SELECT_PREDICT_FOR_SAME_TESTED_ID = '''
         SELECT tested_method_id, test_method_id, confidence_num FROM {strategy}
-        WHERE tested_method_id IN tested_methods_in_same_class
+        WHERE tested_method_id = :method_id
     '''
 
     def __init__(self, path_to_db: str, path_to_csv: str, for_strategy: str):
@@ -59,7 +41,7 @@ class CoChangedDataMeasurement(AbstractMeasurement):
             test_id, tested_id = self.__get_method_id_by_(test), self.__get_method_id_by_(tested)
             self._ground_truth_links[(tested_id, test_id)] = 1.0
         for (tested_id, test_id) in self._ground_truth_links.keys():
-            links_for_class = self.__get_predicate_links_for_same_class(tested_id)
+            links_for_class = self.__get_predicate_links_of(tested_id)
             self._predict_links.update(links_for_class)
         predicted_links_set = set(self._predict_links.keys())
         ground_truth_links_set = set(self._ground_truth_links.keys())
@@ -80,11 +62,11 @@ class CoChangedDataMeasurement(AbstractMeasurement):
         logging.warning(f'cannot find out method "{gt_name.long_name()}" from the database. ')
         return None
 
-    def __get_predicate_links_for_same_class(self, id: int) -> Dict[Tuple[int, int], float]:
+    def __get_predicate_links_of(self, method_id: int) -> Dict[Tuple[int, int], float]:
         output = dict()
         cursor = self._predict_database.cursor()
-        select_sql = self.__SELECT_PREDICT_FOR_SAME_TESTED_CLASS.format(strategy=self.__strategy_name)
-        all_links = cursor.execute(select_sql, {'method_id': id}).fetchall()
+        select_sql = self.__SELECT_PREDICT_FOR_SAME_TESTED_ID.format(strategy=self.__strategy_name)
+        all_links = cursor.execute(select_sql, {'method_id': method_id}).fetchall()
         for tested_id, test_id, confidence_num in all_links: output[(tested_id, test_id)] = confidence_num
         return output
 

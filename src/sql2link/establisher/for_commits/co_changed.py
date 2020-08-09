@@ -46,7 +46,7 @@ class CoChangedInCommitLinkEstablisher(AbsLinkEstablisher):
                 WHERE change_type = 'REMOVE' AND target_method_id = id
             )
             AND simple_name NOT IN ('main(String [ ] args)', 'suite()', 'setUp()', 'tearDown()')
-            AND simple_name NOT LIKE (class_name || '%') AND simple_name NOT LIKE ('for(int i%')
+            AND simple_name NOT LIKE ('for(int i%')
         ), tested_methods AS (
             SELECT alive_methods.id AS tested_method_id, commit_hash FROM (
                 changes INNER JOIN alive_methods

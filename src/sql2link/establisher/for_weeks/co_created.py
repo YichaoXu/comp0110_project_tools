@@ -18,6 +18,7 @@ class CoCreatedInWeekLinkEstablisher(AbsLinkEstablisher):
         CREATE TABLE co_created_for_weeks (
             tested_method_id INTEGER NOT NULL,
             test_method_id INTEGER NOT NULL,
+            confidence_num INTEGER, 
             FOREIGN KEY (tested_method_id) REFERENCES methods(id), 
             FOREIGN KEY (test_method_id) REFERENCES methods(id)
         );
@@ -26,7 +27,7 @@ class CoCreatedInWeekLinkEstablisher(AbsLinkEstablisher):
     @property
     def _insert_new_row_sql(self) -> str:
         return '''
-        INSERT INTO co_created_for_weeks (tested_method_id, test_method_id) VALUES(?, ?)
+        INSERT INTO co_created_for_weeks (tested_method_id, test_method_id, confidence_num) VALUES(?, ?, 1)
         '''
 
     @property

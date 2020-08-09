@@ -3,7 +3,7 @@ from sqlite3 import Connection
 from typing import Any
 
 
-class SqlStmtHolder(object):
+class AbsSqlStmtHolder(object):
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
@@ -19,13 +19,13 @@ class SqlStmtHolder(object):
 class AbsTableHandler(object):
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, connection: Connection, stmts: SqlStmtHolder):
+    def __init__(self, connection: Connection, stmts: AbsSqlStmtHolder):
         connection.execute(stmts.create_db_stmt()).close()
         connection.commit()
         self.__db_stmts = stmts
         self.__db_connection = connection
 
-    def _get_stmts_holder(self) -> SqlStmtHolder:
+    def _get_stmts_holder(self) -> AbsSqlStmtHolder:
         return self.__db_stmts
 
     def _get_db_connection(self) -> Connection:

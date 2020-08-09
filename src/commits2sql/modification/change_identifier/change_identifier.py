@@ -1,6 +1,6 @@
 import re
 from typing import Dict, Tuple, Optional
-from modification.change_identifier.change_utils import CodeDiffer, ChangeClassifier, CodeAnalyser
+from commits2sql.modification.change_identifier.change_utils import CodeDiffer, ChangeClassifier, CodeAnalyser
 
 
 class ChangeIdentifier(object):

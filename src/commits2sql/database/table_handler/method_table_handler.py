@@ -1,10 +1,9 @@
 from sqlite3 import Connection
 from typing import List, Tuple
+from commits2sql.database.table_handler import AbsSqlStmtHolder, AbsTableHandler
 
-from database.table_handler.abs_table_handler import SqlStmtHolder, AbsTableHandler
 
-
-class MethodStmtHolder(SqlStmtHolder):
+class MethodStmtHolder(AbsSqlStmtHolder):
 
     def create_db_stmt(self) -> str:
         return """
@@ -20,13 +19,13 @@ class MethodStmtHolder(SqlStmtHolder):
     def insert_row_stmt(self) -> str:
         return """
             INSERT INTO methods (simple_name, class_name, file_path)
-            VALUES (:utils, :class_name, :path); 
+            VALUES (:method_name, :class_name, :path); 
         """
 
     def select_primary_key_stmt(self) -> str:
         return """
             SELECT id FROM methods
-            WHERE simple_name = :utils 
+            WHERE simple_name = :method_name 
                 AND class_name = :class_name
                 AND file_path = :path
         """

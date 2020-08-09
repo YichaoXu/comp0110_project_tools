@@ -1,7 +1,7 @@
 from typing import Optional, Set, List
 
-from modification.change_holder.abstract_holder import AbstractHolder
-from modification.change_holder.class_holder import ClassHolder
+from commits2sql.modification.change_holder.abstract_holder import AbstractHolder
+from commits2sql.modification.change_holder.class_holder import ClassHolder
 
 
 class FileHolder(AbstractHolder):

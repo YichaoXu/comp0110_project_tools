@@ -1,12 +1,11 @@
 from sqlite3 import Connection
+from commits2sql.database.table_handler import AbsSqlStmtHolder, AbsTableHandler
 
-from database.table_handler.abs_table_handler import SqlStmtHolder, AbsTableHandler
 
-
-class ChangeStmtHolder(SqlStmtHolder):
+class ChangeStmtHolder(AbsSqlStmtHolder):
 
     def create_db_stmt(self) -> str:
-        return """
+        return '''
             CREATE TABLE if NOT EXISTS changes (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 change_type VARCHAR(32) NOT NULL, 
@@ -15,24 +14,31 @@ class ChangeStmtHolder(SqlStmtHolder):
                 FOREIGN KEY (target_method_id)  REFERENCES methods(id),
                 FOREIGN KEY (commit_hash)  REFERENCES commits(hash_value) 
             );
-        """
+        '''
 
     def insert_row_stmt(self) -> str:
-        return """
+        return '''
             INSERT INTO changes (change_type, target_method_id, commit_hash)
             VALUES (:change_type, :method_id, :commit_hash) 
-        """
+        '''
 
     def select_primary_key_stmt(self) -> str:
         # SHOULD NOT BE USED
         raise NotImplementedError('TABLE "CHANGE" DO NOT HAVE ALTERNATIVE KEYS')
 
     def update_target_method_id_stmt(self) -> str:
-        return """
+        return '''
             UPDATE changes 
             SET target_method_id = :current_method_id
             WHERE target_method_id = :previous_method_id
-        """
+        '''
+    
+    
+    def delete_changes_to_target_methods_stmt(self) -> str:
+        return '''
+            DELETE FROM changes
+            WHERE target_method_id =:target_method_id
+        '''
 
 
 class ChangeTableHandler(AbsTableHandler):
@@ -45,7 +51,7 @@ class ChangeTableHandler(AbsTableHandler):
     def __init__(self, db_connection: Connection):
         AbsTableHandler.__init__(self, db_connection, ChangeStmtHolder())
 
-    def update_target_method(self, previous_method_id: str, current_method_id: str) -> None:
+    def update_target_method(self, previous_method_id: int, current_method_id: int) -> None:
         update_sql = self._get_stmts_holder().update_target_method_id_stmt()
         parameters = {'previous_method_id':previous_method_id, 'current_method_id': current_method_id}
         exe_cursor = self._get_db_connection().execute(update_sql, parameters)
@@ -54,4 +60,10 @@ class ChangeTableHandler(AbsTableHandler):
 
     def insert_new_change(self, change_type: str, target_method_id: int, commit_hash: str) -> int:
         return self._insert_new_row(change_type=change_type, method_id=target_method_id, commit_hash=commit_hash)
+
+    def delete_changes_of(self, target_method_id: int) -> None:
+        delete_sql = self._get_stmts_holder().delete_changes_to_target_methods_stmt()
+        exe_cursor = self._get_db_connection().execute(delete_sql, {'target_method_id':target_method_id})
+        exe_cursor.close()
+        return None
 
