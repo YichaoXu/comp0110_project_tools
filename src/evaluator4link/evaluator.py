@@ -25,20 +25,14 @@ class LinkEvaluator(object):
 
     def output_predict_to_csv(self) -> None:
         measurement = CoChangedCommitMeasurement(self.__path_to_db, self.__path_to_csv)
-        db_cursor = sqlite3.connect(self.__path_to_db)
-
-        def from_id_to_signature(method_id: int) -> str:
-            select_sql = 'SELECT id, simple_name, class_name, file_path FROM methods WHERE id =:method_id'
-            exe_result = db_cursor.execute(select_sql, {'method_id': method_id}).fetchone()
-            output = {'id': exe_result[0], 'signature': exe_result[1], 'class': exe_result[2], 'path': exe_result[3]}
-            return str(output)
-
         csv_file = open(self.__path_to_csv.replace('.csv', '_predict_links.csv'), "w")
         csv_writer = csv.writer(csv_file)
         csv_writer.writerow(['test', 'function', 'confidence'])
         for (tested, test), confidence in measurement.predict_links.items():
-            test_data, tested_data = from_id_to_signature(test), from_id_to_signature(tested)
-            csv_writer.writerow([test_data, tested_data, confidence])
-        db_cursor.close()
+            csv_writer.writerow([
+                measurement.get_method_name_by_id(test),
+                measurement.get_method_name_by_id(tested),
+                confidence]
+            )
         csv_file.close()
         return None

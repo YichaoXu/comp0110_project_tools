@@ -42,7 +42,7 @@ class MeanAbsoluteAndSquaredErrorMeasurement(AbstractMeasurement):
     def _measure(self) -> None:
         for row in self._ground_truth_pandas.itertuples():
             test, tested = GroundTruthMethodName(row[1]), GroundTruthMethodName(row[2])
-            signatures_key = (tested.long_name(), test.long_name())
+            signatures_key = (tested.long_name, test.long_name)
             predicate_score = self.__get_predicate_score(test, tested)
             self.__map_for_score[signatures_key] = predicate_score
         return None

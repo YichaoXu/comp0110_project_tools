@@ -21,22 +21,22 @@ def init_figure():
     valid_pd_links_dict = evaluation.valid_predict_links
     predicted_links: List[float] = list()
     for link in gt_links_id_pair:
-        if link not in valid_pd_links_dict:
-            predicted_links.append(0.0)
-        else:
-            predicted_links.append(valid_pd_links_dict[link])
+        if link not in valid_pd_links_dict: predicted_links.append(0.0)
+        else: predicted_links.append(valid_pd_links_dict[link])
 
-def draw_figure_for_co_changed():
+
+def draw_figure_for_co_changed(predicted_links: List[float]):
     plt.figure(num=1, figsize=(30, 5))
-    X = np.arange(num_of_links)
+    X = np.arange(len(predicted_links))
     Y = np.array(predicted_links)
     plt.bar(X, Y, facecolor='#9999ff', edgecolor='white')
     for x, y in zip(X, Y): plt.text(x + 0.01, y + 0.05, '%.1f' % y, ha='center', va='top')
-    plt.xlim((-1, num_of_links))
+    plt.xlim((-1, len(predicted_links)))
     plt.ylim((0, 1.25))
     plt.xlabel("co_change_id")
     plt.ylabel("confidence")
     plt.show()
+
 
 def __draw_scatter_from_dict(ax: Axes3D, dict: Dict[Tuple[int, int], float], color: str, marker: str, size: int):
     id_pairs = dict.keys()
@@ -60,16 +60,29 @@ def draw_3D_for_co_changed():
     plt.ylabel("test_id")
     plt.show()
 
+
 def print_complete_report() -> None:
-    evaluator = LinkEvaluator(path_to_db, path_to_csv)
-    print(evaluator.precision_recall_and_f1_score_of_strategy('co_created_for_commits'))
-    print(evaluator.precision_recall_and_f1_score_of_strategy('co_changed_for_commits'))
-    print(evaluator.precision_recall_and_f1_score_of_strategy('apriori_for_commits'))
-    print(evaluator.precision_recall_and_f1_score_of_strategy('co_created_for_weeks'))
-    print(evaluator.precision_recall_and_f1_score_of_strategy('co_changed_for_weeks'))
-    print(evaluator.precision_recall_and_f1_score_of_strategy('apriori_for_weeks'))
+    evaluate_report = LinkEvaluator(path_to_db, path_to_csv)
+    print(evaluate_report.precision_recall_and_f1_score_of_strategy('co_created_for_commits'))
+    print(evaluate_report.precision_recall_and_f1_score_of_strategy('co_changed_for_commits'))
+    print(evaluate_report.precision_recall_and_f1_score_of_strategy('apriori_for_commits'))
+    print(evaluate_report.precision_recall_and_f1_score_of_strategy('co_created_for_weeks'))
+    print(evaluate_report.precision_recall_and_f1_score_of_strategy('co_changed_for_weeks'))
+    print(evaluate_report.precision_recall_and_f1_score_of_strategy('apriori_for_weeks'))
     return None
 
+
+def print_apriori_report() -> None:
+    evaluate_report = LinkEvaluator(path_to_db, path_to_csv)
+    print(evaluate_report.precision_recall_and_f1_score_of_strategy('apriori_for_commits'))
+    print(evaluate_report.precision_recall_and_f1_score_of_strategy('apriori_for_weeks'))
+
+
+def output_to_csv() -> None:
+    evaluate_report = LinkEvaluator(path_to_db, path_to_csv)
+    evaluate_report.output_predict_to_csv()
+
+
 if __name__ == '__main__':
-    evaluator = LinkEvaluator(path_to_db, path_to_csv)
-    evaluator.output_predict_to_csv()
+    evaluate_report = LinkEvaluator(path_to_db, path_to_csv)
+    evaluate_report.output_predict_to_csv()

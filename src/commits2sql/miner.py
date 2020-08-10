@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime
+from typing import Optional
 
 from pydriller import RepositoryMining
 from pydriller.domain.commit import Modification
@@ -16,12 +17,24 @@ class DataMiner(object):
         self.__recorder = Recorder(TableHandlerFactory(tmp_data_dir, repos_name))
         self.__repos_path = repos_path
 
-    def mining(self, start_date: datetime = None, end_date: datetime = None):
-        for commit in RepositoryMining(self.__repos_path, since=start_date, to=end_date).traverse_commits():
+    def mining(
+            self,
+            start_date: Optional[datetime] = None,
+            end_date: Optional[datetime] = None,
+            from_commit: Optional[str] = None,
+            to_commit: Optional[str] = None
+    ):
+        repos = RepositoryMining(
+            self.__repos_path,
+            since=start_date,
+            to=end_date,
+            from_commit=from_commit,
+            to_commit=to_commit
+        )
+        for commit in repos.traverse_commits():
             if not self.__recorder.is_record_before(commit.hash):
                 for modification in commit.modifications: self.__handle_modification(modification, commit.hash)
                 self.__recorder.record_git_commit(commit.hash, commit.author_date)
-
 
     def __handle_modification(self, modification: Modification, commit_hash: str):
         file = Extractor(modification).get_changed_file()

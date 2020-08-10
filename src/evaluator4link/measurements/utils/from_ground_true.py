@@ -42,5 +42,6 @@ class GroundTruthMethodName(AbsMethodNameExtractor):
     def signature(self) -> str:
         return self.__signature
 
+    @property
     def long_name(self) -> str:
         return self.__long_name
