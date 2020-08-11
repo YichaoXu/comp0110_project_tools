@@ -1,11 +1,7 @@
-from typing import Set, Tuple
-
-from evaluator4link.measurements import CoChangedDataMeasurement
-from evaluator4link.measurements.abs_measurement import AbstractMeasurement
-from evaluator4link.measurements.utils import GroundTruthMethodName, DatabaseMethodName
+from evaluator4link.measurements import StrategyWithGroundTruthMeasurement
 
 
-class PrecisionRecallMeasurement(CoChangedDataMeasurement):
+class PrecisionRecallMeasurement(StrategyWithGroundTruthMeasurement):
 
     def __init__(self, path_to_db: str, path_to_csv: str, for_strategy: str):
         super().__init__(path_to_db, path_to_csv, for_strategy)

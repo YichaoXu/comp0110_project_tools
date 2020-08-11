@@ -1,11 +1,11 @@
 import math
-from typing import Any, Dict, Tuple
+from typing import Dict, Tuple
 
-from evaluator4link.measurements import AbstractMeasurement
+from evaluator4link.measurements import StrategyWithGroundTruthMeasurement
 from evaluator4link.measurements.utils import GroundTruthMethodName, DatabaseMethodName
 
 
-class MeanAbsoluteAndSquaredErrorMeasurement(AbstractMeasurement):
+class MeanAbsoluteAndSquaredErrorMeasurement(StrategyWithGroundTruthMeasurement):
 
     __SELECT_ALL_CANDIDATE_WITH_SCORE_SQL = '''
         WITH alive_methods AS (
@@ -60,8 +60,8 @@ class MeanAbsoluteAndSquaredErrorMeasurement(AbstractMeasurement):
         })
 
         for test_candidate, tested_candidate, confidence in possible_link:
-            pd_name_test = DatabaseMethodName(test_candidate)
-            pd_name_tested = DatabaseMethodName(tested_candidate)
+            pd_name_test = DatabaseMethodName(test.file_path, test.class_name, test_candidate)
+            pd_name_tested = DatabaseMethodName(tested.file_path, tested.class_name, tested_candidate)
             if pd_name_test.signature != test.signature: continue
             if pd_name_tested.signature != tested.signature: continue
             return confidence

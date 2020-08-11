@@ -1,11 +1,13 @@
 import logging
-from typing import Dict, Tuple, Set, Optional
+from typing import Dict, Tuple, Optional
+
+import pandas
 
 from evaluator4link.measurements import AbstractMeasurement
 from evaluator4link.measurements.utils import GroundTruthMethodName, DatabaseMethodName
 
 
-class CoChangedDataMeasurement(AbstractMeasurement):
+class StrategyWithGroundTruthMeasurement(AbstractMeasurement):
 
     __SELECT_CANDIDATE_ID_SQL = '''
         WITH alive_methods AS (
@@ -17,7 +19,7 @@ class CoChangedDataMeasurement(AbstractMeasurement):
             AND simple_name NOT IN ('main(String [ ] args)', 'suite()', 'setUp()', 'tearDown()')
             AND simple_name NOT LIKE ('for(int i%')
         )
-        SELECT id, simple_name FROM alive_methods
+        SELECT id, simple_name, class_name, file_path FROM alive_methods
         WHERE simple_name LIKE :simple_name
         AND class_name LIKE :class_name
         AND file_path LIKE :file_path
@@ -28,13 +30,27 @@ class CoChangedDataMeasurement(AbstractMeasurement):
         WHERE test_method_id = :method_id OR test_method_id = :method_id
     '''
 
+    __SELECT_METHOD_BY_ID_SQL_STMT = '''
+        SELECT simple_name, class_name, file_path FROM methods
+        WHERE id = :method_id
+    '''
+
+    __FLYWEIGHT_TRUTH_PANDAS: Optional[pandas.DataFrame] = None
+
+    @property
+    def _ground_truth_pandas(self) -> pandas.DataFrame:
+        return self.__FLYWEIGHT_TRUTH_PANDAS
+
     def __init__(self, path_to_db: str, path_to_csv: str, for_strategy: str):
+        if self.__FLYWEIGHT_TRUTH_PANDAS is None:
+            self.__FLYWEIGHT_TRUTH_PANDAS = pandas.read_csv(path_to_csv)
         self.__strategy_name = for_strategy
         self._predict_links: Dict[Tuple[int, int], float] = dict()
         self._ground_truth_links: Dict[Tuple[int, int], float] = dict()
         self._valid_predict_links: Dict[Tuple[int, int], float] = dict()
         self._method_name_id_dict: Dict[str, int] = dict()
-        super().__init__(path_to_db, path_to_csv)
+        super().__init__(path_to_db)
+
 
     def _measure(self) -> None:
         for row in self._ground_truth_pandas.itertuples():
@@ -60,8 +76,9 @@ class CoChangedDataMeasurement(AbstractMeasurement):
             'class_name': f'{gt_name.class_name.replace("::", "%::")}%',
             'file_path': f'%{gt_name.file_path}%',
         })
-        for method_id, long_name in candidates_methods.fetchall():
-            if DatabaseMethodName(long_name).signature != gt_name.signature: continue
+        for method_id, long_name, class_name, file_path in candidates_methods.fetchall():
+            db_name = DatabaseMethodName(file_path, class_name, long_name)
+            if db_name.signature != gt_name.signature: continue
             self._method_name_id_dict[gt_name.long_name] = method_id
             return method_id
         logging.warning(f'cannot find out method "{gt_name.long_name}" from the database. ')
@@ -70,7 +87,12 @@ class CoChangedDataMeasurement(AbstractMeasurement):
     def get_method_name_by_id(self, method_id: int) -> Optional[str]:
         for stored_name, stored_id in self._method_name_id_dict.items():
             if stored_id == method_id: return stored_name
-        return None
+        cursor = self._predict_database.cursor()
+        select_sql = self.__SELECT_METHOD_BY_ID_SQL_STMT
+        method_name, method_class, method_file = cursor.execute(select_sql, {'method_id': method_id}).fetchall()
+        name_from_db = DatabaseMethodName(method_file, method_class, method_name).package_name_with_signature
+        self._method_name_id_dict[name_from_db] = method_id
+        return name_from_db
 
     def __get_predicate_links_of(self, method_id: int) -> Dict[Tuple[int, int], float]:
         output = dict()

@@ -85,4 +85,6 @@ def output_to_csv() -> None:
 
 if __name__ == '__main__':
     evaluate_report = LinkEvaluator(path_to_db, path_to_csv)
-    evaluate_report.output_predict_to_csv()
+    evaluate_report.coordinates_for_methods_commits()
+
+

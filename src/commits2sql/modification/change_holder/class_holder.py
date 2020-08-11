@@ -1,4 +1,4 @@
-from typing import Optional, Set, List
+from typing import Optional, List
 
 from commits2sql.modification.change_holder.abstract_holder import AbstractHolder
 from commits2sql.modification.change_holder.method_holder import MethodHolder

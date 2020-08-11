@@ -9,7 +9,7 @@ from commits2sql.modification import ClassHolder, FileHolder, MethodHolder, Chan
 
 class Extractor(object):
 
-    __CLASS_METHOD_REGEX = r'^(?:(?P<class_name>.*)::)*(?P<utils>\w+(?:<.*>)?\(.*\))$'
+    __CLASS_METHOD_REGEX = r'^(?:(?P<class_name>.*)::)*(?P<method_name>\w+(?:<.*>)?\(.*\))$'
     __CLASS_NAME_REGEX = r'^(?:(?P<super_name>.*)::)*(?P<class_name>\w+(?:<.*>)?)$'
 
     def __init__(self, modification: Modification):
@@ -129,7 +129,7 @@ class Extractor(object):
         output: Dict[str:Method] = dict()
         for method in methods:
             match_names = re.match(self.__CLASS_METHOD_REGEX, method.long_name).groupdict()
-            method_name = match_names['utils']
+            method_name = match_names['method_name']
             output[method_name] = method
         return output
 

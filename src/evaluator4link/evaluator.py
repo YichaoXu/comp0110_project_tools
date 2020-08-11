@@ -1,8 +1,8 @@
 import csv
-import sqlite3
 
 from evaluator4link.measurements import *
-from evaluator4link.measurements.co_changed_commits import CoChangedCommitMeasurement
+from evaluator4link.measurements.with_database_only.methods_changes_measurement import CommitsDataMeasurement
+from evaluator4link.measurements.with_ground_truth.for_co_changed_only.co_changed_commits import CoChangedCommitMeasurement
 
 
 class LinkEvaluator(object):
@@ -17,8 +17,8 @@ class LinkEvaluator(object):
     def mean_absolute_and_squared_error_of_strategy(self, name: str) -> MeanAbsoluteAndSquaredErrorMeasurement:
         return MeanAbsoluteAndSquaredErrorMeasurement(self.__path_to_db, self.__path_to_csv, name)
 
-    def raw_links_for_predicated_and_ground_truth(self, name: str) -> CoChangedDataMeasurement:
-        return CoChangedDataMeasurement(self.__path_to_db, self.__path_to_csv, name)
+    def raw_links_for_predicated_and_ground_truth(self, name: str) -> StrategyWithGroundTruthMeasurement:
+        return StrategyWithGroundTruthMeasurement(self.__path_to_db, self.__path_to_csv, name)
 
     def co_changed_commits(self) -> CoChangedCommitMeasurement:
         return CoChangedCommitMeasurement(self.__path_to_db, self.__path_to_csv)
@@ -29,10 +29,9 @@ class LinkEvaluator(object):
         csv_writer = csv.writer(csv_file)
         csv_writer.writerow(['test', 'function', 'confidence'])
         for (tested, test), confidence in measurement.predict_links.items():
-            csv_writer.writerow([
-                measurement.get_method_name_by_id(test),
-                measurement.get_method_name_by_id(tested),
-                confidence]
-            )
+            csv_writer.writerow([test, tested,confidence])
         csv_file.close()
         return None
+
+    def coordinates_for_methods_commits(self) -> CommitsDataMeasurement:
+        return CommitsDataMeasurement(self.__path_to_db, self.__path_to_csv)

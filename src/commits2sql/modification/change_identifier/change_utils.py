@@ -10,7 +10,7 @@ class CodeAnalyser(object):
 
     __REGEX_CLASS_DECLARATION = r'(?P<before_name>class\s+)' \
                                 r'(?P<name>\w+(?:<.+>)?)' \
-                                r'(?P<after_name>\s+(?:(?:implements|extends)\s+.+\s+)?{)'
+                                r'(?P<after_name>\s+(?:(?:implements|extends)\s+\S+\s+)?{)'
 
     def __init__(self, code: str):
         self.code = code
