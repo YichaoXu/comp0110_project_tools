@@ -12,7 +12,28 @@ class CommitsDataMeasurement(AbstractMeasurement):
         )
     '''
 
-    def __init__(self, path_to_db: str, for_strategy: str):
+    @property
+    def package_name_x_table(self) -> Dict[str, int]:
+        return self.__method_package_x_table
+
+    @property
+    def commit_hash_y_table(self) -> Dict[str, int]:
+        return self.__commit_hash_y_table
+
+    @property
+    def change_type_z_table(self) -> Dict[str, int]:
+        return self.__change_type_z_table
+
+    @property
+    def coordinates_for_test(self) -> List[Tuple[int, int, int]]:
+        return self.__coordinates_for_test
+
+    @property
+    def coordinates_for_tested(self) -> List[Tuple[int, int, int]]:
+        return self.__coordinates_for_tested
+
+
+    def __init__(self, path_to_db: str):
         # Method_X, COMMIT_Y, ChangeType, FilePath
         self.__commit_hash_y_table: Dict[str, int] = dict()
         self.__method_package_x_table: Dict[str, int] = dict()

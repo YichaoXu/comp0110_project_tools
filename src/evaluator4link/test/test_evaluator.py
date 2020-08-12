@@ -82,9 +82,28 @@ def output_to_csv() -> None:
     evaluate_report = LinkEvaluator(path_to_db, path_to_csv)
     evaluate_report.output_predict_to_csv()
 
+def draw_scatter_figure(axes: Axes3D, data: List[Tuple[int, int, int]], color: str, marker: str, size: int) -> None:
+    xs, ys, zs = list(), list(), list()
+    for x, y, z in data:
+        xs.append(x)
+        ys.append(y)
+        zs.append(z)
+    axes.scatter(np.array(xs), np.array(ys), np.array(zs), c=color, marker=marker, s=size)
+
 
 if __name__ == '__main__':
     evaluate_report = LinkEvaluator(path_to_db, path_to_csv)
-    evaluate_report.coordinates_for_methods_commits()
+    coordinates = evaluate_report.coordinates_for_methods_commits()
+    fig = plt.figure(num=1, figsize=(15, 15))
+    ax = fig.add_subplot(111, projection='3d')
+    draw_scatter_figure(ax, coordinates.coordinates_for_test, 'r', '.', 1)
+    draw_scatter_figure(ax, coordinates.coordinates_for_tested, 'b', '^', 1)
+    print(coordinates.package_name_x_table)
+    print(coordinates.commit_hash_y_table)
+    print(coordinates.change_type_z_table)
+    plt.title('sale')
+    plt.xlabel("method_id")
+    plt.ylabel("commit_id")
+    plt.show()
 
 

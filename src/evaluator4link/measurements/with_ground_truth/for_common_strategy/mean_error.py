@@ -1,7 +1,7 @@
 import math
 from typing import Dict, Tuple
 
-from evaluator4link.measurements import StrategyWithGroundTruthMeasurement
+from evaluator4link.measurements.with_ground_truth import StrategyWithGroundTruthMeasurement
 from evaluator4link.measurements.utils import GroundTruthMethodName, DatabaseMethodName
 
 

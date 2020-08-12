@@ -8,7 +8,8 @@ class CommitStmtHolder(AbsSqlStmtHolder):
     def create_db_stmt(self) -> str:
         return """
         CREATE TABLE if NOT EXISTS git_commits(
-            hash_value VARCHAR(63) PRIMARY KEY,
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            hash_value VARCHAR(63) NOT NULL, 
             commit_date DATE NOT NULL,
             CONSTRAINT hash_unique UNIQUE (hash_value)
         )

@@ -1,4 +1,4 @@
-from evaluator4link.measurements import StrategyWithGroundTruthMeasurement
+from evaluator4link.measurements.with_ground_truth import StrategyWithGroundTruthMeasurement
 
 
 class PrecisionRecallMeasurement(StrategyWithGroundTruthMeasurement):

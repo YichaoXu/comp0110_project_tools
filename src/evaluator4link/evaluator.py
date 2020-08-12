@@ -1,8 +1,6 @@
 import csv
 
 from evaluator4link.measurements import *
-from evaluator4link.measurements.with_database_only.methods_changes_measurement import CommitsDataMeasurement
-from evaluator4link.measurements.with_ground_truth.for_co_changed_only.co_changed_commits import CoChangedCommitMeasurement
 
 
 class LinkEvaluator(object):
