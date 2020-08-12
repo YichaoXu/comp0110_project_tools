@@ -18,6 +18,10 @@ class AbstractCommitsCountMeasurement(AbstractMeasurement):
     def type_zs_mapping(self) -> Dict[str, int]:
         return self.__type_zs_table
 
+    @property
+    def commits_count_coordinates(self) -> List[Tuple[int, int, int]]:
+        return self.__commit_change_counts
+
     def __init__(self, path_to_db: str):
         self.__commit_xs_table: Dict[str, int] = dict()
         self.__type_zs_table: Dict[str, int] = {'ADD': 1, 'MODIFY': 2, 'RENAME': 3}
@@ -91,6 +95,42 @@ class MethodCommitsCountMeasurement(AbstractCommitsCountMeasurement):
                )
            )
            SELECT commit_hash, change_type, COUNT(*) AS change_count FROM methods_changes
+           GROUP BY commit_hash, change_type
+           ORDER BY commit_date, commit_hash
+       '''
+
+
+class TestedCommitsCountMeasurement(AbstractCommitsCountMeasurement):
+    @property
+    def _count_changes_in_commit_sql_stmt(self) -> str:
+        return '''
+           WITH tested_changes AS (
+               SELECT DISTINCT target_method_id, change_type, commit_hash, commit_date FROM (
+                   changes INNER JOIN methods INNER JOIN git_commits
+                   ON changes.target_method_id = methods.id
+                   AND commit_hash = hash_value
+               )
+               WHERE file_path LIKE 'src/main/java/org/apache/commons/lang3%'
+           )
+           SELECT commit_hash, change_type, COUNT(*) AS change_count FROM tested_changes
+           GROUP BY commit_hash, change_type
+           ORDER BY commit_date, commit_hash
+       '''
+
+
+class TestCommitsCountMeasurement(AbstractCommitsCountMeasurement):
+    @property
+    def _count_changes_in_commit_sql_stmt(self) -> str:
+        return '''
+           WITH test_changes AS (
+               SELECT DISTINCT target_method_id, change_type, commit_hash, commit_date FROM (
+                   changes INNER JOIN methods INNER JOIN git_commits
+                   ON changes.target_method_id = methods.id
+                   AND commit_hash = hash_value
+               )
+                WHERE file_path LIKE 'src/test/java/org/apache/commons/lang3%'
+           )
+           SELECT commit_hash, change_type, COUNT(*) AS change_count FROM test_changes
            GROUP BY commit_hash, change_type
            ORDER BY commit_date, commit_hash
        '''

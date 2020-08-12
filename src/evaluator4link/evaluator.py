@@ -1,6 +1,7 @@
 import csv
 
 from evaluator4link.measurements import *
+from evaluator4link.measurements.with_database_only import *
 
 
 class LinkEvaluator(object):
@@ -32,4 +33,19 @@ class LinkEvaluator(object):
         return None
 
     def coordinates_for_methods_commits(self) -> CommitsDataMeasurement:
-        return CommitsDataMeasurement(self.__path_to_db, self.__path_to_csv)
+        return CommitsDataMeasurement(self.__path_to_db)
+
+    def coordinates_for_files_changes_distribution_of_commits(self) -> FileCommitsCountMeasurement:
+        return FileCommitsCountMeasurement(self.__path_to_db)
+
+    def coordinates_for_classes_changes_distribution_of_commits(self) -> ClassCommitsCountMeasurement:
+        return ClassCommitsCountMeasurement(self.__path_to_db)
+
+    def coordinates_for_methods_changes_distribution_of_commits(self) -> MethodCommitsCountMeasurement:
+        return MethodCommitsCountMeasurement(self.__path_to_db)
+
+    def coordinates_for_tested_changes_distribution_of_commits(self) -> TestedCommitsCountMeasurement:
+        return TestedCommitsCountMeasurement(self.__path_to_db)
+
+    def coordinates_for_test_changes_distribution_of_commits(self) -> TestCommitsCountMeasurement:
+        return TestCommitsCountMeasurement(self.__path_to_db)
