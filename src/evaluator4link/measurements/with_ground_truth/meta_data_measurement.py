@@ -10,7 +10,7 @@ from evaluator4link.measurements.utils import GroundTruthMethodName, DatabaseMet
 class StrategyWithGroundTruthMeasurement(AbstractMeasurement):
 
     __SELECT_CANDIDATE_ID_SQL = '''
-        WITH alive_methods AS (
+        WITH valid_methods AS (
             SELECT id, simple_name, class_name, file_path FROM methods
             WHERE NOT EXISTS(
                 SELECT target_method_id FROM changes
@@ -19,7 +19,7 @@ class StrategyWithGroundTruthMeasurement(AbstractMeasurement):
             AND simple_name NOT IN ('main(String [ ] args)', 'suite()', 'setUp()', 'tearDown()')
             AND simple_name NOT LIKE ('for(int i%')
         )
-        SELECT id, simple_name, class_name, file_path FROM alive_methods
+        SELECT id, simple_name, class_name, file_path FROM valid_methods
         WHERE simple_name LIKE :simple_name
         AND class_name LIKE :class_name
         AND file_path LIKE :file_path
@@ -58,7 +58,6 @@ class StrategyWithGroundTruthMeasurement(AbstractMeasurement):
             test_id, tested_id = self.get_method_id_by_(test), self.get_method_id_by_(tested)
             self._ground_truth_links[(tested_id, test_id)] = 1.0
         for (tested_id, test_id) in self._ground_truth_links.keys():
-            if test_id in self._predict_links: continue
             links_for_class = self.__get_predicate_links_of(test_id)
             self._predict_links.update(links_for_class)
         predicted_links_set = set(self._predict_links.keys())
