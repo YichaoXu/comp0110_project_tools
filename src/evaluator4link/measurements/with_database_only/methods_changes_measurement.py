@@ -4,7 +4,6 @@ from evaluator4link.measurements.utils import DatabaseMethodName
 
 
 class CommitsDataMeasurement(AbstractMeasurement):
-
     __SELECT_ALL_CHANGED_COMMITS_OF_METHOD_SQL_STMT = '''
         SELECT simple_name, class_name, file_path, change_type, commit_hash FROM (
             changes INNER JOIN methods

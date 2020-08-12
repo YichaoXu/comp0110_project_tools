@@ -1,5 +1,4 @@
 import abc
-import pandas
 import sqlite3
 from typing import Optional, Any
 
