@@ -116,7 +116,7 @@ def draw_2d_scatter_for_commits_distributions():
             axes: Axes,
             by_3d_coordinates: List[Tuple[int, int, int]],
             title: str, y_max: Optional[int] = None
-    ):
+    ) -> None:
         added: Tuple[List[int], List[int]] = (list(), list())
         modified: Tuple[List[int], List[int]] = (list(), list())
         renamed: Tuple[List[int], List[int]] = (list(), list())
@@ -133,6 +133,7 @@ def draw_2d_scatter_for_commits_distributions():
         axes.set_xlabel("commits_id(chronological)")
         axes.set_ylabel("number of changed (R: ADD, B: MODIFY, G: RENAME)")
         axes.set_title(title)
+        return None
 
     evaluate_report = LinkEvaluator(path_to_db, path_to_csv)
     files = evaluate_report.coordinates_for_files_changes_distribution_of_commits().commits_count_coordinates
@@ -151,6 +152,58 @@ def draw_2d_scatter_for_commits_distributions():
 
 
 if __name__ == '__main__':
-    draw_2d_scatter_for_commits_distributions()
+
+    def draw_2d_scatter_for_ground_truth_and_predict_in_commits(
+            axes: Axes,
+            ground_truth_count: Dict[int, int],
+            predicted_count: Dict[int, int],
+            title: str,
+            y_max: Optional[int] = None
+
+    ) -> None:
+        filtered: Dict[int, int] = dict()
+        xs, ys = list(), list()
+        for commit, count in predicted_count.items():
+            if y_max is not None and count > y_max:
+                filtered[commit] = count
+                continue
+            xs.append(commit)
+            ys.append(count)
+        axes.scatter(np.array(xs), np.array(ys), c='b', marker='.', s=200)
+
+        xs, ys = list(), list()
+        for commit, count in ground_truth_count.items():
+            if commit in filtered:
+                print(f'{count} valid links from {filtered[commit]} predicted ones in commit {commit} are filtered')
+                continue
+            xs.append(commit)
+            ys.append(count)
+        axes.scatter(np.array(xs), np.array(ys), c='r', marker='.', s=200)
+        axes.set_xlabel('commit_id')
+        axes.set_ylabel('co_changed_num')
+        axes.set_title(title)
+        return None
+
+    evaluate_report = LinkEvaluator(path_to_db, path_to_csv).coordinates_for_test_and_tested_and_commits()
+    fig = plt.figure(num=2, figsize=(25, 25))
+    draw_2d_scatter_for_ground_truth_and_predict_in_commits(
+        fig.add_subplot(211),
+        evaluate_report.commits_ground_truth,
+        evaluate_report.commit_predicted_co_changed_for_test,
+        'test_based',
+        20
+    )
+    draw_2d_scatter_for_ground_truth_and_predict_in_commits(
+        fig.add_subplot(212),
+        evaluate_report.commits_ground_truth,
+        evaluate_report.commit_predicted_co_changed_for_tested,
+        'tested_based',
+        20
+    )
+    plt.show()
+
+
+
+
 
 

@@ -2,6 +2,7 @@ import csv
 
 from evaluator4link.measurements import *
 from evaluator4link.measurements.with_database_only import *
+from evaluator4link.measurements.with_ground_truth import CoChangedCommitCountMeasurement
 
 
 class LinkEvaluator(object):
@@ -49,3 +50,6 @@ class LinkEvaluator(object):
 
     def coordinates_for_test_changes_distribution_of_commits(self) -> TestCommitsCountMeasurement:
         return TestCommitsCountMeasurement(self.__path_to_db)
+
+    def coordinates_for_test_and_tested_and_commits(self) -> CoChangedCommitCountMeasurement:
+        return CoChangedCommitCountMeasurement(self.__path_to_db, self.__path_to_csv)
