@@ -1,11 +1,13 @@
 import os
 from typing import List, Tuple, Dict, Optional
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 from mpl_toolkits.mplot3d import Axes3D
 
 from evaluator4link.evaluator import LinkEvaluator
+from evaluator4link.measurements.with_database_only.commits_count_measurement import AbstractCommitsCountMeasurement
 
 path_to_comp0110 = os.path.expanduser('~/Project/PycharmProjects/comp0110')
 path_to_tmp = f'{path_to_comp0110}/.tmp'
@@ -151,8 +153,7 @@ def draw_2d_scatter_for_commits_distributions():
     plt.show()
 
 
-if __name__ == '__main__':
-
+def draw_2d_fig_for_test_and_tested_and_commits():
     def draw_2d_scatter_for_ground_truth_and_predict_in_commits(
             axes: Axes,
             ground_truth_count: Dict[int, int],
@@ -201,6 +202,66 @@ if __name__ == '__main__':
         20
     )
     plt.show()
+
+def draw_box_plot_for_changes_in_commits():
+
+    def __draw_box_plot(
+            axes: Axes, change_coordinates: List[Tuple[int, int, int]],title: str,
+    ) -> None:
+        added_dict, modified_dict, renamed_dict, total_dict = dict(), dict(), dict(), dict()
+        for commit_x, count_y, type_c in change_coordinates:
+            added_dict.setdefault(commit_x, 0)
+            modified_dict.setdefault(commit_x, 0)
+            renamed_dict.setdefault(commit_x, 0)
+            total_dict.setdefault(commit_x, 0)
+            if type_c == 1:
+                added_dict[commit_x] = count_y
+            elif type_c == 2:
+                modified_dict[commit_x] = count_y
+            elif type_c == 3:
+                renamed_dict[commit_x] = count_y
+            total_dict[commit_x] += count_y
+        added = [count for count in added_dict.values()]
+        modified = [count for count in modified_dict.values()]
+        renamed = [count for count in renamed_dict.values()]
+        total = [count for count in total_dict.values()]
+        axes.set_title(title)
+        axes.boxplot(
+            x=[added, modified, renamed, total],
+            labels=('added', 'modified', 'renamed', 'total'),
+            showfliers=False
+        )
+        return None
+
+    evaluator = LinkEvaluator(path_to_db, path_to_csv)
+    files = evaluator.coordinates_for_files_changes_distribution_of_commits().commits_count_coordinates
+    classes = evaluator.coordinates_for_classes_changes_distribution_of_commits().commits_count_coordinates
+    methods = evaluator.coordinates_for_methods_changes_distribution_of_commits().commits_count_coordinates
+    test = evaluator.coordinates_for_test_changes_distribution_of_commits().commits_count_coordinates
+    tested = evaluator.coordinates_for_tested_changes_distribution_of_commits().commits_count_coordinates
+
+    fig = plt.figure(num=5, figsize=(25, 25))
+    __draw_box_plot(fig.add_subplot(511), files, 'changes for files')
+    __draw_box_plot(fig.add_subplot(512), classes, 'changes for classes')
+    __draw_box_plot(fig.add_subplot(513), methods, 'changes for methods')
+    __draw_box_plot(fig.add_subplot(514), test, 'changes for test')
+    __draw_box_plot(fig.add_subplot(515), tested, 'changes for tested')
+    plt.show()
+
+
+
+
+if __name__ == '__main__':
+    evaluator = LinkEvaluator(path_to_db, path_to_csv)
+    print(evaluator.precision_recall_and_f1_score_of_strategy('links_filtered_commits_based_cochanged'))
+
+
+
+
+
+
+
+
 
 
 

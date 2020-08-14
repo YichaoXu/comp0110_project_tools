@@ -9,13 +9,13 @@ class AprioriInCommitLinkEstablisher(AbsLinkEstablisher):
     @property
     def _remove_previous_table_sql(self) -> str:
         return '''
-        DROP TABLE IF EXISTS apriori_for_commits
+        DROP TABLE IF EXISTS links_commits_based_apriori
         '''
 
     @property
     def _initial_table_sql(self) -> str:
         return '''
-        CREATE TABLE apriori_for_commits (
+        CREATE TABLE links_commits_based_apriori (
             tested_method_id INTEGER NOT NULL,
             test_method_id INTEGER NOT NULL,
             support_num INTEGER NOT NULL,
@@ -28,7 +28,7 @@ class AprioriInCommitLinkEstablisher(AbsLinkEstablisher):
     @property
     def _insert_new_row_sql(self) -> str:
         return '''
-        INSERT INTO apriori_for_commits (
+        INSERT INTO links_commits_based_apriori (
             tested_method_id, 
             test_method_id, 
             support_num, 
@@ -37,14 +37,13 @@ class AprioriInCommitLinkEstablisher(AbsLinkEstablisher):
         '''
 
     @property
-    def _link_establishing_sql(self) -> str:
-        return '''
+    def _link_establishing_sql(self) -> str: return '''
         WITH valid_methods AS (
             SELECT id, file_path FROM methods
-            WHERE simple_name NOT LIKE ('if(%')
+            WHERE simple_name NOT IN ('main(String [ ] args)', 'suite()', 'setUp()', 'tearDown()')
             AND simple_name NOT LIKE ('for(int i%')
         ), frequent_unique_table AS (
-            SELECT target_method_id AS id, COUNT(commit_hash) AS support FROM main.changes
+            SELECT target_method_id AS id, COUNT(commit_hash) AS support FROM changes 
             WHERE EXISTS(
                 SELECT id FROM valid_methods WHERE target_method_id = id
             ) GROUP BY target_method_id
@@ -66,12 +65,12 @@ class AprioriInCommitLinkEstablisher(AbsLinkEstablisher):
         ),
         frequent_test_commits AS (
             SELECT commit_hash AS test_commit_hash, test_id, test_support
-            FROM changes, frequent_test_table
+            FROM changes , frequent_test_table
             WHERE target_method_id = test_id
         ),
         frequent_tested_commits AS (
             SELECT commit_hash AS tested_commit_hash, tested_id, tested_support
-            FROM changes, frequent_tested_table
+            FROM changes , frequent_tested_table
             WHERE target_method_id = tested_id
         ),
         frequent_cochange_table AS(

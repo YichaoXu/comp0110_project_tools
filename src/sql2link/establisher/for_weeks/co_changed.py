@@ -9,13 +9,13 @@ class CoChangedInWeekLinkEstablisher(AbsLinkEstablisher):
     @property
     def _remove_previous_table_sql(self) -> str:
         return '''
-        DROP TABLE IF EXISTS co_changed_for_weeks
+        DROP TABLE IF EXISTS links_weeks_based_cochanged
         '''
 
     @property
     def _initial_table_sql(self) -> str:
         return '''
-        CREATE TABLE co_changed_for_weeks (
+        CREATE TABLE links_weeks_based_cochanged (
             tested_method_id INTEGER NOT NULL,
             test_method_id INTEGER NOT NULL,
             support_num INTEGER NOT NULL,
@@ -28,7 +28,7 @@ class CoChangedInWeekLinkEstablisher(AbsLinkEstablisher):
     @property
     def _insert_new_row_sql(self) -> str:
         return '''
-        INSERT INTO co_changed_for_weeks (
+        INSERT INTO links_weeks_based_cochanged (
             tested_method_id, 
             test_method_id, 
             support_num, 
@@ -37,8 +37,7 @@ class CoChangedInWeekLinkEstablisher(AbsLinkEstablisher):
         '''
 
     @property
-    def _link_establishing_sql(self) -> str:
-        return '''
+    def _link_establishing_sql(self) -> str: return '''
         WITH week_commit_table AS (
             SELECT STRFTIME('%Y-%W', commit_date)  AS week, hash_value AS commit_hash  FROM git_commits
         ),
@@ -51,7 +50,7 @@ class CoChangedInWeekLinkEstablisher(AbsLinkEstablisher):
             AND simple_name NOT IN ('main(String [ ] args)', 'suite()', 'setUp()', 'tearDown()')
             AND simple_name NOT LIKE (class_name || '%') AND simple_name NOT LIKE ('for(int i%')
         ),
-        modified_week_table AS (
+        week_based_changes AS (
             SELECT target_method_id, week AS change_week, file_path FROM (
                 changes JOIN week_commit_table JOIN alive_methods
                 ON changes.commit_hash = week_commit_table.commit_hash
@@ -59,12 +58,20 @@ class CoChangedInWeekLinkEstablisher(AbsLinkEstablisher):
             )
             GROUP BY target_method_id, change_week
         ),
+        filtered_weeks AS (
+            SELECT change_week FROM week_based_changes
+            GROUP BY change_week HAVING COUNT(*) < 20
+        ),
+        filtered_week_based_changes AS (
+            SELECT * FROM week_based_changes
+            WHERE change_week IN filtered_weeks
+        ),
         tested_modified AS (
-            SELECT target_method_id AS tested_method_id, change_week FROM modified_week_table
+            SELECT target_method_id AS tested_method_id, change_week FROM filtered_week_based_changes
             WHERE file_path LIKE 'src/main/java/org/apache/commons/lang3/%'
         ),
         test_modified AS (
-            SELECT target_method_id AS test_method_id, change_week FROM modified_week_table
+            SELECT target_method_id AS test_method_id, change_week FROM filtered_week_based_changes
             WHERE file_path LIKE 'src/test/java/org/apache/commons/lang3/%'
         ),
         tested_count AS (
@@ -77,10 +84,9 @@ class CoChangedInWeekLinkEstablisher(AbsLinkEstablisher):
                 ON test_modified.change_week = tested_modified.change_week
             ) GROUP BY tested_method_id, test_method_id
         )
-        SELECT co_changed.tested_method_id, test_method_id, support, CAST(support AS FLOAT)/changed_count AS confidence 
+        SELECT co_changed.tested_method_id, test_method_id, support, CAST(support AS FLOAT)/changed_count AS confidence
         FROM (
             co_changed INNER JOIN tested_count
             ON co_changed.tested_method_id = tested_count.tested_method_id
         )
-
-        '''
+    '''

@@ -9,13 +9,13 @@ class CoCreatedInWeekLinkEstablisher(AbsLinkEstablisher):
     @property
     def _remove_previous_table_sql(self) -> str:
         return '''
-        DROP TABLE IF EXISTS co_created_for_weeks
+        DROP TABLE IF EXISTS links_weeks_based_cocreated
         '''
 
     @property
     def _initial_table_sql(self) -> str:
         return '''
-        CREATE TABLE co_created_for_weeks (
+        CREATE TABLE links_weeks_based_cocreated (
             tested_method_id INTEGER NOT NULL,
             test_method_id INTEGER NOT NULL,
             confidence_num INTEGER, 
@@ -27,7 +27,7 @@ class CoCreatedInWeekLinkEstablisher(AbsLinkEstablisher):
     @property
     def _insert_new_row_sql(self) -> str:
         return '''
-        INSERT INTO co_created_for_weeks (tested_method_id, test_method_id, confidence_num) VALUES(?, ?, 1)
+        INSERT INTO links_weeks_based_cocreated (tested_method_id, test_method_id, confidence_num) VALUES(?, ?, 1)
         '''
 
     @property

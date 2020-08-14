@@ -1,5 +1,4 @@
 from typing import Dict, List
-
 from evaluator4link.measurements.with_ground_truth import StrategyWithGroundTruthMeasurement
 from evaluator4link.measurements.utils import GroundTruthMethodName
 
