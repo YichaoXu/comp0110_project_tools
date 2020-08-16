@@ -7,5 +7,11 @@
       <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
       <jdbc-url>jdbc:sqlite:$PROJECT_DIR$/../.tmp/commons_lang.db</jdbc-url>
     </data-source>
+    <data-source source="LOCAL" name="complete_common_langs" uuid="686ea4f5-744c-412b-8b83-9e0f3f84e995">
+      <driver-ref>sqlite.xerial</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
+      <jdbc-url>jdbc:sqlite:$PROJECT_DIR$/../.tmp/complete_commons_lang.db</jdbc-url>
+    </data-source>
   </component>
 </project>

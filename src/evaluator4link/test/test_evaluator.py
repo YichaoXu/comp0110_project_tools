@@ -7,28 +7,11 @@ from matplotlib.axes import Axes
 from mpl_toolkits.mplot3d import Axes3D
 
 from evaluator4link.evaluator import LinkEvaluator
-from evaluator4link.measurements.with_database_only.commits_count_measurement import AbstractCommitsCountMeasurement
 
 path_to_comp0110 = os.path.expanduser('~/Project/PycharmProjects/comp0110')
 path_to_tmp = f'{path_to_comp0110}/.tmp'
 path_to_db = f'{path_to_tmp}/commons_lang.db'
 path_to_csv = f'{path_to_tmp}/commons_lang.csv'
-
-
-def init_figure():
-    evaluator = LinkEvaluator(path_to_db, path_to_csv)
-    evaluation = evaluator.raw_links_for_predicated_and_ground_truth('apriori_for_weeks')
-    num_of_links = len(evaluation.ground_truth_links)
-    gt_links_id_pair = list(evaluation.ground_truth_links.keys())
-    pd_links_dict = evaluation.predict_links
-    valid_pd_links_dict = evaluation.valid_predict_links
-    predicted_links: List[float] = list()
-    for link in gt_links_id_pair:
-        if link not in valid_pd_links_dict:
-            predicted_links.append(0.0)
-        else:
-            predicted_links.append(valid_pd_links_dict[link])
-
 
 def draw_figure_for_co_changed(predicted_links: List[float]):
     plt.figure(num=1, figsize=(30, 5))
@@ -55,6 +38,18 @@ def __draw_scatter_from_dict(ax: Axes3D, dict: Dict[Tuple[int, int], float], col
 
 
 def draw_3D_for_co_changed():
+    evaluator = LinkEvaluator(path_to_db, path_to_csv)
+    evaluation = evaluator.raw_links_for_predicated_and_ground_truth('apriori_for_weeks')
+    num_of_links = len(evaluation.ground_truth_links)
+    gt_links_id_pair = list(evaluation.ground_truth_links.keys())
+    pd_links_dict = evaluation.predict_links
+    valid_pd_links_dict = evaluation.valid_predict_links
+    predicted_links: List[float] = list()
+    for link in gt_links_id_pair:
+        if link not in valid_pd_links_dict:
+            predicted_links.append(0.0)
+        else:
+            predicted_links.append(valid_pd_links_dict[link])
     fig = plt.figure(num=1, figsize=(15, 15))
     ax1 = fig.add_subplot(111, projection='3d')
     __draw_scatter_from_dict(ax1, pd_links_dict, 'b', '.', 1)
@@ -122,13 +117,19 @@ def draw_2d_scatter_for_commits_distributions():
         added: Tuple[List[int], List[int]] = (list(), list())
         modified: Tuple[List[int], List[int]] = (list(), list())
         renamed: Tuple[List[int], List[int]] = (list(), list())
-        for coordinate in by_3d_coordinates:
-            if y_max is not None and coordinate[1] > y_max:
-                print(f'IGNORE COMMITS({coordinate[0]}), SIZE ({coordinate[1]}), TYPE({coordinate[2]}).')
+        for change_commit, change_count, change_type in by_3d_coordinates:
+            if y_max is not None and change_count > y_max:
+                print(f'IGNORE COMMITS({change_commit}), SIZE ({change_count}), TYPE({change_type}).')
                 continue
-            target_collections = added if coordinate[2] == 1 else modified if coordinate[2] == 2 else renamed
-            target_collections[0].append(coordinate[0])
-            target_collections[1].append(coordinate[1])
+            if change_type == 1:
+                added[0].append(change_commit)
+                added[1].append(change_count)
+            elif change_type == 2:
+                modified[0].append(change_commit)
+                modified[1].append(change_count)
+            elif change_type == 3:
+                renamed[0].append(change_commit)
+                renamed[1].append(change_count)
         axes.scatter(np.array(added[0]), np.array(added[1]), c='r', marker='.', s=1)
         axes.scatter(np.array(modified[0]), np.array(modified[1]), c='b', marker='.', s=1)
         axes.scatter(np.array(renamed[0]), np.array(renamed[1]), c='g', marker='.', s=1)
@@ -203,6 +204,7 @@ def draw_2d_fig_for_test_and_tested_and_commits():
     )
     plt.show()
 
+
 def draw_box_plot_for_changes_in_commits():
 
     def __draw_box_plot(
@@ -220,6 +222,8 @@ def draw_box_plot_for_changes_in_commits():
                 modified_dict[commit_x] = count_y
             elif type_c == 3:
                 renamed_dict[commit_x] = count_y
+            else:
+                continue
             total_dict[commit_x] += count_y
         added = [count for count in added_dict.values()]
         modified = [count for count in modified_dict.values()]
@@ -253,9 +257,8 @@ def draw_box_plot_for_changes_in_commits():
 
 if __name__ == '__main__':
     evaluator = LinkEvaluator(path_to_db, path_to_csv)
-    print(evaluator.precision_recall_and_f1_score_of_strategy('links_filtered_commits_based_cochanged'))
-
-
+    report = evaluator.precision_recall_and_f1_score_of_strategy('links_filtered_commits_based_cochanged')
+    print(report)
 
 
 

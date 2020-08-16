@@ -7,7 +7,7 @@ class MethodStmtHolder(AbsSqlStmtHolder):
 
     def create_db_stmt(self) -> str:
         return """
-            CREATE TABLE if NOT EXISTS methods (
+            CREATE TABLE if NOT EXISTS git_methods (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 simple_name VARCHAR(32) NOT NULL, 
                 class_name VARCHAR(32) NOT NULL, 
@@ -18,13 +18,13 @@ class MethodStmtHolder(AbsSqlStmtHolder):
 
     def insert_row_stmt(self) -> str:
         return """
-            INSERT INTO methods (simple_name, class_name, file_path)
+            INSERT INTO git_methods (simple_name, class_name, file_path)
             VALUES (:method_name, :class_name, :path); 
         """
 
     def select_primary_key_stmt(self) -> str:
         return """
-            SELECT id FROM methods
+            SELECT id FROM git_methods
             WHERE simple_name = :method_name 
                 AND class_name = :class_name
                 AND file_path = :path
@@ -34,9 +34,9 @@ class MethodStmtHolder(AbsSqlStmtHolder):
         return """
             SELECT OLD.id, NEW.id
             FROM (
-                (SELECT id, class_name, simple_name FROM methods WHERE file_path = :old_path) OLD
+                (SELECT id, class_name, simple_name FROM git_methods WHERE file_path = :old_path) OLD
                 JOIN 
-                (SELECT id, class_name, simple_name FROM methods WHERE file_path = :new_path) NEW
+                (SELECT id, class_name, simple_name FROM git_methods WHERE file_path = :new_path) NEW
                 ON OLD.class_name = NEW.class_name 
                 AND OLD.simple_name = NEW.simple_name
             )
@@ -46,9 +46,9 @@ class MethodStmtHolder(AbsSqlStmtHolder):
         return """
             SELECT OLD.id, NEW.id
             FROM (
-                (SELECT id, simple_name FROM methods WHERE file_path=:path AND class_name=:old_class) OLD
+                (SELECT id, simple_name FROM git_methods WHERE file_path=:path AND class_name=:old_class) OLD
                 JOIN 
-                (SELECT id, simple_name FROM methods WHERE file_path=:path AND class_name=:new_class) NEW
+                (SELECT id, simple_name FROM git_methods WHERE file_path=:path AND class_name=:new_class) NEW
                 ON OLD.simple_name = NEW.simple_name
             )
         """
@@ -57,28 +57,28 @@ class MethodStmtHolder(AbsSqlStmtHolder):
         return """
             SELECT OLD.id, NEW.id
             FROM (
-                (SELECT id, file_path, class_name FROM methods WHERE id=:method_id) OLD
+                (SELECT id, file_path, class_name FROM git_methods WHERE id=:method_id) OLD
                 JOIN 
-                (SELECT id, file_path, class_name FROM methods WHERE simple_name=:new_name) NEW
+                (SELECT id, file_path, class_name FROM git_methods WHERE simple_name=:new_name) NEW
                 ON OLD.file_path = NEW.file_path AND OLD.class_name = NEW.class_name
             )
         """
 
     def delete_row_by_id_stmt(self) -> str:
         return """
-            DELETE FROM methods 
+            DELETE FROM git_methods 
             WHERE id = :id
         """
     def update_simple_name_stmt(self) -> str:
         return """
-            UPDATE methods 
+            UPDATE git_methods 
             SET simple_name = :new_name
             WHERE id=:method_id
         """
 
     def update_class_name_stmt(self) -> str:
         return """
-            UPDATE methods 
+            UPDATE git_methods 
             SET class_name = :new_class
             WHERE class_name = :old_class
                 AND file_path = :path
@@ -86,7 +86,7 @@ class MethodStmtHolder(AbsSqlStmtHolder):
 
     def update_file_path_stmt(self) -> str:
         return """
-            UPDATE methods 
+            UPDATE git_methods 
             SET file_path = :new_path
             WHERE file_path = :old_path
         """

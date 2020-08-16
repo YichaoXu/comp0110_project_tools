@@ -18,8 +18,8 @@ class CoChangedInCommitLinkEstablisher(AbsLinkEstablisher):
             test_method_id INTEGER NOT NULL,
             support_num INTEGER NOT NULL,
             confidence_num FLOAT NOT NULL,
-            FOREIGN KEY (tested_method_id) REFERENCES methods(id), 
-            FOREIGN KEY (test_method_id) REFERENCES methods(id)
+            FOREIGN KEY (tested_method_id) REFERENCES git_methods(id), 
+            FOREIGN KEY (test_method_id) REFERENCES git_methods(id)
         );
     '''
 
@@ -37,19 +37,19 @@ class CoChangedInCommitLinkEstablisher(AbsLinkEstablisher):
     @property
     def _link_establishing_sql(self) -> str: return '''
         WITH valid_methods AS (
-            SELECT id, file_path FROM methods
+            SELECT id, file_path FROM git_methods
             WHERE simple_name NOT IN ('main(String [ ] args)', 'suite()', 'setUp()', 'tearDown()')
             AND simple_name NOT LIKE ('for(int i%')
         ), tested_methods AS (
             SELECT valid_methods.id AS tested_method_id, commit_hash FROM (
-                changes  INNER JOIN valid_methods
-                ON valid_methods.id = changes .target_method_id
+                git_changes  INNER JOIN valid_methods
+                ON valid_methods.id = git_changes.target_method_id
             )
             WHERE file_path LIKE 'src/main/java/org/apache/commons/lang3/%'
         ), test_methods AS (
             SELECT valid_methods.id AS test_method_id, commit_hash FROM (
-                changes  INNER JOIN valid_methods
-                ON valid_methods.id = changes .target_method_id
+                git_changes INNER JOIN valid_methods
+                ON valid_methods.id = git_changes.target_method_id
             )
             WHERE valid_methods.file_path LIKE 'src/test/java/org/apache/commons/lang3/%'
         ), tested_change_count AS (

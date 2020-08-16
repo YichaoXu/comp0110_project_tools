@@ -11,9 +11,9 @@ class StrategyWithGroundTruthMeasurement(AbstractMeasurement):
 
     __SELECT_CANDIDATE_ID_SQL = '''
         WITH valid_methods AS (
-            SELECT id, simple_name, class_name, file_path FROM methods
+            SELECT id, simple_name, class_name, file_path FROM git_methods
             WHERE NOT EXISTS(
-                SELECT target_method_id FROM changes
+                SELECT target_method_id FROM git_changes
                 WHERE change_type = 'REMOVE' AND target_method_id = id
             )
             AND simple_name NOT IN ('main(String [ ] args)', 'suite()', 'setUp()', 'tearDown()')
@@ -31,7 +31,7 @@ class StrategyWithGroundTruthMeasurement(AbstractMeasurement):
     '''
 
     __SELECT_METHOD_BY_ID_SQL_STMT = '''
-        SELECT simple_name, class_name, file_path FROM methods
+        SELECT simple_name, class_name, file_path FROM git_methods
         WHERE id = :method_id
     '''
 

@@ -14,8 +14,7 @@ if __name__ == '__main__':
     sql2linker.run(LinkStrategy.APRIORI, LinkBase.FOR_WEEKS, {
         'min_support_for_change': 2, 'min_support_for_cochange': 1, 'min_confidence': 0.1
     })
-    sql2linker.run_with_filter(LinkStrategy.COCHANGE, LinkBase.FOR_COMMITS, {
-        'add_count_limits' : 5,
-        'modify_count_limits' : 6,
-        'rename_count_limits' : 1000
+    sql2linker.run_with_filter(is_for_all=True, parameters= {
+        'total_count_max' : 30,
+        'total_count_min' : 2
     }, ignore_previous=True)

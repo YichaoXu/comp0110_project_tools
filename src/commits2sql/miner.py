@@ -32,9 +32,9 @@ class DataMiner(object):
             to_commit=to_commit
         )
         for commit in repos.traverse_commits():
-            if not self.__recorder.is_record_before(commit.hash):
-                for modification in commit.modifications: self.__handle_modification(modification, commit.hash)
-                self.__recorder.record_git_commit(commit.hash, commit.author_date)
+            if self.__recorder.is_record_before(commit.hash): continue
+            for modification in commit.modifications: self.__handle_modification(modification, commit.hash)
+            self.__recorder.record_git_commit(commit.hash, commit.author_date)
 
     def __handle_modification(self, modification: Modification, commit_hash: str):
         file = Extractor(modification).get_changed_file()

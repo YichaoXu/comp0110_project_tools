@@ -6,19 +6,19 @@ class ChangeStmtHolder(AbsSqlStmtHolder):
 
     def create_db_stmt(self) -> str:
         return '''
-            CREATE TABLE if NOT EXISTS changes (
+            CREATE TABLE if NOT EXISTS git_changes (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 change_type VARCHAR(32) NOT NULL, 
                 target_method_id INTEGER NOT NULL, 
                 commit_hash VARCHAR(64) NOT NULL, 
                 FOREIGN KEY (target_method_id)  REFERENCES methods(id),
-                FOREIGN KEY (commit_hash)  REFERENCES commits(hash_value) 
+                FOREIGN KEY (commit_hash)  REFERENCES git_commits(hash_value) 
             );
         '''
 
     def insert_row_stmt(self) -> str:
         return '''
-            INSERT INTO changes (change_type, target_method_id, commit_hash)
+            INSERT INTO git_changes (change_type, target_method_id, commit_hash)
             VALUES (:change_type, :method_id, :commit_hash) 
         '''
 
@@ -28,7 +28,7 @@ class ChangeStmtHolder(AbsSqlStmtHolder):
 
     def update_target_method_id_stmt(self) -> str:
         return '''
-            UPDATE changes 
+            UPDATE git_changes 
             SET target_method_id = :current_method_id
             WHERE target_method_id = :previous_method_id
         '''
@@ -36,7 +36,7 @@ class ChangeStmtHolder(AbsSqlStmtHolder):
     
     def delete_changes_to_target_methods_stmt(self) -> str:
         return '''
-            DELETE FROM changes
+            DELETE FROM git_changes
             WHERE target_method_id =:target_method_id
         '''
 

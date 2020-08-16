@@ -2,7 +2,8 @@ from enum import Enum
 from typing import Optional
 
 from sql2link.establisher import *
-from sql2link.establisher.with_filter.co_changed import CoChangedtedInAllChangeTypeFilteredCommitLinkEstablisher
+from sql2link.establisher.for_commits.with_filter import CoChangedtedForSeparateChangeTypeFilteredCommitLinkEstablisher, \
+    CoChangedtedForAllChangeTypeFilteredCommitLinkEstablisher
 
 
 class LinkStrategy(Enum):
@@ -34,6 +35,7 @@ class TraceabilityPredictor(object):
             elif base is LinkBase.FOR_WEEKS: establish = AprioriInWeekLinkEstablisher(self.__db_path)
         if establish is not None: establish.do(parameters=parameter,is_previous_ingored=ignore_previous)
 
-    def run_with_filter(self, strategy: LinkStrategy, base: LinkBase, parameter=None, ignore_previous: bool = False):
-        establish = CoChangedtedInAllChangeTypeFilteredCommitLinkEstablisher(self.__db_path)
-        if establish is not None: establish.do(parameters=parameter,is_previous_ingored=ignore_previous)
+    def run_with_filter(self, is_for_all: bool = False, parameters=None, ignore_previous: bool = False):
+        if is_for_all: establisher = CoChangedtedForAllChangeTypeFilteredCommitLinkEstablisher(self.__db_path)
+        else: establisher = CoChangedtedForSeparateChangeTypeFilteredCommitLinkEstablisher(self.__db_path)
+        establisher.do(parameters=parameters, is_previous_ingored=ignore_previous)

@@ -24,7 +24,7 @@ class AbstractCommitsCountMeasurement(AbstractMeasurement):
 
     def __init__(self, path_to_db: str):
         self.__commit_xs_table: Dict[str, int] = dict()
-        self.__type_zs_table: Dict[str, int] = {'ADD': 1, 'MODIFY': 2, 'RENAME': 3}
+        self.__type_zs_table: Dict[str, int] = {'ADD': 1, 'MODIFY': 2, 'RENAME': 3, 'REMOVE': 4}
         self.__commit_change_counts: List[Tuple[int, int, int]] = list()
         super().__init__(path_to_db)
 
@@ -51,86 +51,105 @@ class AbstractCommitsCountMeasurement(AbstractMeasurement):
 class FileCommitsCountMeasurement(AbstractCommitsCountMeasurement):
 
     @property
-    def _count_changes_in_commit_sql_stmt(self) -> str:
-        return '''
-           WITH file_changes AS (
-               SELECT DISTINCT file_path, change_type, commit_hash, commit_date FROM (
-                   changes INNER JOIN methods INNER JOIN git_commits
-                   ON changes.target_method_id = methods.id 
-                   AND commit_hash = hash_value
-               )
-           )
-           SELECT commit_hash, change_type, COUNT(*) AS change_count FROM file_changes
-           GROUP BY commit_hash, change_type
-           ORDER BY commit_date, commit_hash
-       '''
+    def _count_changes_in_commit_sql_stmt(self) -> str: return '''
+        WITH files_changes AS (
+            SELECT DISTINCT commit_hash, change_type, file_path FROM (
+                git_changes INNER JOIN git_methods
+                ON git_changes.target_method_id =  git_methods.id
+            )
+        ), test_files AS (
+            SELECT DISTINCT file_path AS unique_class_id FROM git_methods
+            WHERE file_path LIKE 'src/test/java/org/apache/commons/lang3%'
+        ), tested_files AS (
+            SELECT DISTINCT file_path AS unique_class_id FROM git_methods
+            WHERE file_path LIKE 'src/main/java/org/apache/commons/lang3%'
+        ), co_changed_commits AS (
+            SELECT commit_hash FROM files_changes WHERE file_path IN test_files
+            INTERSECT
+            SELECT commit_hash FROM files_changes WHERE file_path IN tested_files
+        )
+        SELECT commit_hash, change_type, COUNT(*) FROM files_changes
+        WHERE commit_hash IN co_changed_commits
+        GROUP BY commit_hash, change_type
+    '''
 
 
 class ClassCommitsCountMeasurement(AbstractCommitsCountMeasurement):
     @property
-    def _count_changes_in_commit_sql_stmt(self) -> str:
-        return '''
-           WITH classes_changes AS (
-               SELECT DISTINCT  file_path, class_name, change_type, commit_hash, commit_date FROM (
-                   changes INNER JOIN methods INNER JOIN git_commits
-                   ON changes.target_method_id = methods.id
-                   AND commit_hash = hash_value
-               )
-           )
-           SELECT commit_hash, change_type, COUNT(*) AS change_count FROM classes_changes
-           GROUP BY commit_hash, change_type
-           ORDER BY commit_date, commit_hash
-       '''
+    def _count_changes_in_commit_sql_stmt(self) -> str: return '''
+        WITH classes_changes AS (
+            SELECT DISTINCT commit_hash, change_type, (class_name || file_path) AS unique_class_id FROM (
+                git_changes INNER JOIN git_methods
+                ON git_changes.target_method_id =  git_methods.id
+            )
+        ), test_classes AS (
+            SELECT DISTINCT (class_name || file_path) AS unique_class_id FROM git_methods
+            WHERE file_path LIKE 'src/test/java/org/apache/commons/lang3%'
+        ), tested_classes AS (
+            SELECT DISTINCT (class_name || file_path) AS unique_class_id FROM git_methods
+            WHERE file_path LIKE 'src/main/java/org/apache/commons/lang3%'
+        ), co_changed_commits AS (
+            SELECT commit_hash FROM classes_changes WHERE unique_class_id IN test_classes
+            INTERSECT
+            SELECT commit_hash FROM classes_changes WHERE unique_class_id IN tested_classes
+        )
+        SELECT commit_hash, change_type, COUNT(*) FROM classes_changes
+        WHERE commit_hash IN co_changed_commits
+        GROUP BY commit_hash, change_type
+    '''
 
 
 class MethodCommitsCountMeasurement(AbstractCommitsCountMeasurement):
     @property
-    def _count_changes_in_commit_sql_stmt(self) -> str:
-        return '''
-           WITH methods_changes AS (
-               SELECT DISTINCT target_method_id, change_type, commit_hash, commit_date FROM (
-                   changes INNER JOIN methods INNER JOIN git_commits
-                   ON changes.target_method_id = methods.id
-                   AND commit_hash = hash_value
-               )
-           )
-           SELECT commit_hash, change_type, COUNT(*) AS change_count FROM methods_changes
-           GROUP BY commit_hash, change_type
-           ORDER BY commit_date, commit_hash
-       '''
+    def _count_changes_in_commit_sql_stmt(self) -> str: return '''
+        WITH test_methods AS (
+            SELECT DISTINCT id FROM git_methods WHERE file_path LIKE 'src/test/java/org/apache/commons/lang3%'
+        ), tested_functions AS (
+            SELECT DISTINCT id FROM git_methods WHERE file_path LIKE 'src/main/java/org/apache/commons/lang3%'
+        ), co_changed_commits AS (
+            SELECT commit_hash FROM git_changes WHERE target_method_id IN test_methods
+            INTERSECT
+            SELECT commit_hash FROM git_changes WHERE target_method_id IN tested_functions
+        )
+        SELECT commit_hash, change_type, COUNT(*) FROM git_changes
+        WHERE commit_hash IN co_changed_commits
+        GROUP BY commit_hash, change_type
+    '''
 
 
 class TestedCommitsCountMeasurement(AbstractCommitsCountMeasurement):
     @property
-    def _count_changes_in_commit_sql_stmt(self) -> str:
-        return '''
-           WITH tested_changes AS (
-               SELECT DISTINCT target_method_id, change_type, commit_hash, commit_date FROM (
-                   changes INNER JOIN methods INNER JOIN git_commits
-                   ON changes.target_method_id = methods.id
-                   AND commit_hash = hash_value
-               )
-               WHERE file_path LIKE 'src/main/java/org/apache/commons/lang3%'
-           )
-           SELECT commit_hash, change_type, COUNT(*) AS change_count FROM tested_changes
-           GROUP BY commit_hash, change_type
-           ORDER BY commit_date, commit_hash
-       '''
+    def _count_changes_in_commit_sql_stmt(self) -> str: return '''
+        WITH test_methods AS (
+            SELECT DISTINCT id FROM git_methods WHERE file_path LIKE 'src/test/java/org/apache/commons/lang3%'
+        ), tested_functions AS (
+            SELECT DISTINCT id FROM git_methods WHERE file_path LIKE 'src/main/java/org/apache/commons/lang3%'
+        ), co_changed_commits AS (
+            SELECT commit_hash FROM git_changes WHERE target_method_id IN test_methods
+            INTERSECT
+            SELECT commit_hash FROM git_changes WHERE target_method_id IN tested_functions
+        )
+        SELECT commit_hash, change_type, COUNT(*) FROM git_changes
+        WHERE commit_hash IN co_changed_commits 
+        AND target_method_id IN tested_functions
+        GROUP BY commit_hash, change_type 
+    '''
 
 
 class TestCommitsCountMeasurement(AbstractCommitsCountMeasurement):
     @property
-    def _count_changes_in_commit_sql_stmt(self) -> str:
-        return '''
-           WITH test_changes AS (
-               SELECT DISTINCT target_method_id, change_type, commit_hash, commit_date FROM (
-                   changes INNER JOIN methods INNER JOIN git_commits
-                   ON changes.target_method_id = methods.id
-                   AND commit_hash = hash_value
-               )
-                WHERE file_path LIKE 'src/test/java/org/apache/commons/lang3%'
-           )
-           SELECT commit_hash, change_type, COUNT(*) AS change_count FROM test_changes
-           GROUP BY commit_hash, change_type
-           ORDER BY commit_date, commit_hash
-       '''
+    def _count_changes_in_commit_sql_stmt(self) -> str: return '''
+        WITH test_methods AS (
+            SELECT DISTINCT id FROM git_methods WHERE file_path LIKE 'src/test/java/org/apache/commons/lang3%'
+        ), tested_functions AS (
+            SELECT DISTINCT id FROM git_methods WHERE file_path LIKE 'src/main/java/org/apache/commons/lang3%'
+        ), co_changed_commits AS (
+            SELECT commit_hash FROM git_changes WHERE target_method_id IN test_methods
+            INTERSECT
+            SELECT commit_hash FROM git_changes WHERE target_method_id IN tested_functions
+        )
+        SELECT commit_hash, change_type, COUNT(*) FROM git_changes
+        WHERE commit_hash IN co_changed_commits 
+        AND target_method_id IN test_methods
+        GROUP BY commit_hash, change_type 
+    '''

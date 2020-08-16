@@ -8,10 +8,10 @@ class CoChangedCommitCountMeasurement(StrategyWithGroundTruthMeasurement):
     @property
     def __select_co_changed_commits_sql_stmt(self) -> str: return '''
         WITH test_commits AS (
-            SELECT target_method_id AS test_id, commit_hash FROM changes
+            SELECT target_method_id AS test_id, commit_hash FROM git_changes
             WHERE target_method_id = :test_method_id
         ), tested_commits AS (
-            SELECT target_method_id AS tested_id, commit_hash FROM changes
+            SELECT target_method_id AS tested_id, commit_hash FROM git_changes
             WHERE target_method_id = :tested_method_id
         )
         SELECT test_commits.commit_hash FROM (
@@ -23,14 +23,14 @@ class CoChangedCommitCountMeasurement(StrategyWithGroundTruthMeasurement):
     @property
     def __select_co_changed_tested_with_commits_sql_stmt(self) -> str: return '''
         WITH co_changed_ids AS (
-            SELECT test_method_id, tested_method_id FROM co_changed_for_commits
+            SELECT test_method_id, tested_method_id FROM links_commits_based_cochanged
             WHERE test_method_id = :test_method_id
         ), test_commits AS (
-            SELECT target_method_id AS test_id, commit_hash FROM changes
+            SELECT target_method_id AS test_id, commit_hash FROM git_changes
             WHERE target_method_id = :test_method_id
         ), tested_commits AS (
             SELECT target_method_id AS tested_id, commit_hash FROM (
-                changes INNER JOIN co_changed_ids
+                git_changes INNER JOIN co_changed_ids
                 ON target_method_id = co_changed_ids.tested_method_id
             )
         )
@@ -43,14 +43,14 @@ class CoChangedCommitCountMeasurement(StrategyWithGroundTruthMeasurement):
     @property
     def __select_co_changed_test_with_commits_sql_stmt(self) -> str: return '''
         WITH co_changed_ids AS (
-            SELECT test_method_id, tested_method_id FROM co_changed_for_commits
+            SELECT test_method_id, tested_method_id FROM links_commits_based_cochanged
             WHERE tested_method_id = :tested_method_id
         ), tested_commits AS (
-            SELECT target_method_id AS tested_id, commit_hash FROM changes
+            SELECT target_method_id AS tested_id, commit_hash FROM git_changes
             WHERE target_method_id = :tested_method_id
         ), test_commits AS (
             SELECT target_method_id AS test_id, commit_hash FROM (
-                changes INNER JOIN co_changed_ids
+                git_changes INNER JOIN co_changed_ids
                 ON target_method_id = co_changed_ids.test_method_id
             )
         )
@@ -78,7 +78,7 @@ class CoChangedCommitCountMeasurement(StrategyWithGroundTruthMeasurement):
         self.__commits_predicted_co_change_for_test: Dict[int, int] = dict()
         self.__commits_predicted_co_change_for_tested: Dict[int, int] = dict()
         self.__commit_x_mapping: Dict[str, int] = dict()
-        super().__init__(path_to_db, path_to_csv, 'co_changed_for_commits')
+        super().__init__(path_to_db, path_to_csv, 'links_co_changed_for_commits')
 
     def _measure(self) -> None:
         tested_id_set, test_id_set = set(), set()

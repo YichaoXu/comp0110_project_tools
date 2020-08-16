@@ -18,8 +18,8 @@ class AprioriInWeekLinkEstablisher(AbsLinkEstablisher):
             test_method_id INTEGER NOT NULL,
             support_num INTEGER NOT NULL,
             confidence_num FLOAT NOT NULL,
-            FOREIGN KEY (tested_method_id) REFERENCES methods(id), 
-            FOREIGN KEY (test_method_id) REFERENCES methods(id)
+            FOREIGN KEY (tested_method_id) REFERENCES git_methods(id), 
+            FOREIGN KEY (test_method_id) REFERENCES git_methods(id)
         );
     '''
 
@@ -39,19 +39,19 @@ class AprioriInWeekLinkEstablisher(AbsLinkEstablisher):
             SELECT STRFTIME('%Y-%W', commit_date)  AS week, hash_value AS commit_hash  FROM git_commits
         ),
         alive_methods AS (
-            SELECT id, file_path FROM methods
+            SELECT id, file_path FROM git_methods
             WHERE NOT EXISTS(
-                SELECT target_method_id FROM changes
+                SELECT target_method_id FROM git_changes
                 WHERE change_type = 'REMOVE' AND target_method_id = id
             )
             AND simple_name NOT IN ('main(String [ ] args)', 'suite()', 'setUp()', 'tearDown()')
-            AND simple_name NOT LIKE (class_name || '%') AND simple_name NOT LIKE ('for(int i%')
+            AND simple_name NOT LIKE ('for(int i%')
         ),
         week_based_changes AS (
             SELECT target_method_id, week AS change_week, file_path FROM (
-                changes JOIN week_commit_table JOIN alive_methods
-                ON changes.commit_hash = week_commit_table.commit_hash
-                AND changes.target_method_id = alive_methods.id
+                git_changes JOIN week_commit_table JOIN alive_methods
+                ON git_changes.commit_hash = week_commit_table.commit_hash
+                AND git_changes.target_method_id = alive_methods.id
             )
             GROUP BY target_method_id, change_week
         ),
