@@ -44,7 +44,7 @@ class TraceabilityPredictor(object):
         parameters: Dict =None
     ):
         if parameters is None: parameters = dict()
-        establish: Optional[AbsLinkEstablisher] = None
+        establish: Optional[AbsLinkEstablisher]
         if is_week_based:
             if is_for_all: establish = CoChangedtedForAllChangeTypeFilteredWeekLinkEstablisher(self.__db_path)
             else: establish = CoChangedtedForSeparateChangeTypeFilteredWeekLinkEstablisher(self.__db_path)

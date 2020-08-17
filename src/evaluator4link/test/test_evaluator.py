@@ -253,8 +253,6 @@ def draw_box_plot_for_changes_in_commits(
     plt.show()
 
 
-
-
 if __name__ == '__main__':
     evaluator = LinkEvaluator(path_to_db, path_to_csv)
     report = evaluator.precision_recall_and_f1_score_of_strategy('links_weeks_based_cochanged')
