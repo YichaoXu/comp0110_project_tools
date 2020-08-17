@@ -1,12 +1,13 @@
 import os
 from typing import List, Tuple, Dict, Optional
 import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 from mpl_toolkits.mplot3d import Axes3D
 
 from evaluator4link.evaluator import LinkEvaluator
+from evaluator4link.measurements.with_database_only.weeks_count_measurement import FileWeeksCountMeasurement, \
+    ClassWeeksCountMeasurement, MethodWeeksCountMeasurement, TestedWeeksCountMeasurement, TestWeeksCountMeasurement
 
 path_to_comp0110 = os.path.expanduser('~/Project/PycharmProjects/comp0110')
 path_to_tmp = f'{path_to_comp0110}/.tmp'
@@ -205,7 +206,13 @@ def draw_2d_fig_for_test_and_tested_and_commits():
     plt.show()
 
 
-def draw_box_plot_for_changes_in_commits():
+def draw_box_plot_for_changes_in_commits(
+        files : List[Tuple[int, int, int]],
+        classes : List[Tuple[int, int, int]],
+        methods : List[Tuple[int, int, int]],
+        tests : List[Tuple[int, int, int]],
+        testeds : List[Tuple[int, int, int]]
+):
 
     def __draw_box_plot(
             axes: Axes, change_coordinates: List[Tuple[int, int, int]],title: str,
@@ -237,19 +244,12 @@ def draw_box_plot_for_changes_in_commits():
         )
         return None
 
-    evaluator = LinkEvaluator(path_to_db, path_to_csv)
-    files = evaluator.coordinates_for_files_changes_distribution_of_commits().commits_count_coordinates
-    classes = evaluator.coordinates_for_classes_changes_distribution_of_commits().commits_count_coordinates
-    methods = evaluator.coordinates_for_methods_changes_distribution_of_commits().commits_count_coordinates
-    test = evaluator.coordinates_for_test_changes_distribution_of_commits().commits_count_coordinates
-    tested = evaluator.coordinates_for_tested_changes_distribution_of_commits().commits_count_coordinates
-
     fig = plt.figure(num=5, figsize=(25, 25))
     __draw_box_plot(fig.add_subplot(511), files, 'changes for files')
     __draw_box_plot(fig.add_subplot(512), classes, 'changes for classes')
     __draw_box_plot(fig.add_subplot(513), methods, 'changes for methods')
-    __draw_box_plot(fig.add_subplot(514), test, 'changes for test')
-    __draw_box_plot(fig.add_subplot(515), tested, 'changes for tested')
+    __draw_box_plot(fig.add_subplot(514), tests, 'changes for test')
+    __draw_box_plot(fig.add_subplot(515), testeds, 'changes for tested')
     plt.show()
 
 
@@ -257,7 +257,7 @@ def draw_box_plot_for_changes_in_commits():
 
 if __name__ == '__main__':
     evaluator = LinkEvaluator(path_to_db, path_to_csv)
-    report = evaluator.precision_recall_and_f1_score_of_strategy('links_filtered_commits_based_cochanged')
+    report = evaluator.precision_recall_and_f1_score_of_strategy('links_weeks_based_cochanged')
     print(report)
 
 

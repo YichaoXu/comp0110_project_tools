@@ -14,7 +14,13 @@ if __name__ == '__main__':
     sql2linker.run(LinkStrategy.APRIORI, LinkBase.FOR_WEEKS, {
         'min_support_for_change': 2, 'min_support_for_cochange': 1, 'min_confidence': 0.1
     })
-    sql2linker.run_with_filter(is_for_all=True, parameters= {
-        'total_count_max' : 30,
-        'total_count_min' : 2
-    }, ignore_previous=True)
+    sql2linker.run_with_filter(
+        is_week_based=True,
+        is_for_all=True,
+        is_previous_ignored=True,
+        parameters={
+            'add_count_limits': 25,
+            'modify_count_limits': 25,
+            'rename_count_limits': 5
+        }
+    )

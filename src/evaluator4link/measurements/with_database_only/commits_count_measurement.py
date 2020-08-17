@@ -58,10 +58,10 @@ class FileCommitsCountMeasurement(AbstractCommitsCountMeasurement):
                 ON git_changes.target_method_id =  git_methods.id
             )
         ), test_files AS (
-            SELECT DISTINCT file_path AS unique_class_id FROM git_methods
+            SELECT DISTINCT file_path FROM git_methods
             WHERE file_path LIKE 'src/test/java/org/apache/commons/lang3%'
         ), tested_files AS (
-            SELECT DISTINCT file_path AS unique_class_id FROM git_methods
+            SELECT DISTINCT file_path FROM git_methods
             WHERE file_path LIKE 'src/main/java/org/apache/commons/lang3%'
         ), co_changed_commits AS (
             SELECT commit_hash FROM files_changes WHERE file_path IN test_files

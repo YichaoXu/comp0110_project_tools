@@ -1,9 +1,11 @@
 from enum import Enum
-from typing import Optional
+from typing import Optional, Dict
 
 from sql2link.establisher import *
 from sql2link.establisher.for_commits.with_filter import CoChangedtedForSeparateChangeTypeFilteredCommitLinkEstablisher, \
     CoChangedtedForAllChangeTypeFilteredCommitLinkEstablisher
+from sql2link.establisher.for_weeks.with_filter import CoChangedtedForAllChangeTypeFilteredWeekLinkEstablisher, \
+    CoChangedtedForSeparateChangeTypeFilteredWeekLinkEstablisher
 
 
 class LinkStrategy(Enum):
@@ -35,7 +37,18 @@ class TraceabilityPredictor(object):
             elif base is LinkBase.FOR_WEEKS: establish = AprioriInWeekLinkEstablisher(self.__db_path)
         if establish is not None: establish.do(parameters=parameter,is_previous_ingored=ignore_previous)
 
-    def run_with_filter(self, is_for_all: bool = False, parameters=None, ignore_previous: bool = False):
-        if is_for_all: establisher = CoChangedtedForAllChangeTypeFilteredCommitLinkEstablisher(self.__db_path)
-        else: establisher = CoChangedtedForSeparateChangeTypeFilteredCommitLinkEstablisher(self.__db_path)
-        establisher.do(parameters=parameters, is_previous_ingored=ignore_previous)
+    def run_with_filter(self,
+        is_week_based: bool = False,
+        is_for_all: bool = False,
+        is_previous_ignored: bool = False,
+        parameters: Dict =None
+    ):
+        if parameters is None: parameters = dict()
+        establish: Optional[AbsLinkEstablisher] = None
+        if is_week_based:
+            if is_for_all: establish = CoChangedtedForAllChangeTypeFilteredWeekLinkEstablisher(self.__db_path)
+            else: establish = CoChangedtedForSeparateChangeTypeFilteredWeekLinkEstablisher(self.__db_path)
+        else:
+            if is_for_all: establish = CoChangedtedForAllChangeTypeFilteredCommitLinkEstablisher(self.__db_path)
+            else: establish = CoChangedtedForSeparateChangeTypeFilteredCommitLinkEstablisher(self.__db_path)
+        if establish is not None: establish.do(parameters=parameters, is_previous_ingored=is_previous_ignored)

@@ -72,7 +72,6 @@ class CoChangedCommitCountMeasurement(StrategyWithGroundTruthMeasurement):
     def commit_predicted_co_changed_for_tested(self) -> Dict[int, int]:
         return self.__commits_predicted_co_change_for_tested
 
-
     def __init__(self, path_to_db: str, path_to_csv: str):
         self.__commits_ground_truth_co_changed: Dict[int, int] = dict() # commit, number of ground truths
         self.__commits_predicted_co_change_for_test: Dict[int, int] = dict()
@@ -123,8 +122,3 @@ class CoChangedCommitCountMeasurement(StrategyWithGroundTruthMeasurement):
         if hash_value not in self.__commit_x_mapping:
             self.__commit_x_mapping[hash_value] = len(self.__commit_x_mapping) + 1
         return self.__commit_x_mapping[hash_value]
-
-
-
-
-

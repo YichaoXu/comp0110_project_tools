@@ -58,20 +58,12 @@ class CoChangedInWeekLinkEstablisher(AbsLinkEstablisher):
             )
             GROUP BY target_method_id, change_week
         ),
-        filtered_weeks AS (
-            SELECT change_week FROM week_based_changes
-            GROUP BY change_week HAVING COUNT(*) < 20
-        ),
-        filtered_week_based_changes AS (
-            SELECT * FROM week_based_changes
-            WHERE change_week IN filtered_weeks
-        ),
         tested_modified AS (
-            SELECT target_method_id AS tested_method_id, change_week FROM filtered_week_based_changes
+            SELECT target_method_id AS tested_method_id, change_week FROM week_based_changes
             WHERE file_path LIKE 'src/main/java/org/apache/commons/lang3/%'
         ),
         test_modified AS (
-            SELECT target_method_id AS test_method_id, change_week FROM filtered_week_based_changes
+            SELECT target_method_id AS test_method_id, change_week FROM week_based_changes
             WHERE file_path LIKE 'src/test/java/org/apache/commons/lang3/%'
         ),
         tested_count AS (
