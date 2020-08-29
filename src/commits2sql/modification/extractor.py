@@ -81,7 +81,8 @@ class Extractor(object):
         for method in methods:
             match = re.match(self.__CLASS_METHOD_REGEX, method.long_name)
             if match is None:
-                logging.warning(f'method name {method.long_name} is not formatted as expected (ClassName).')
+                logging.warning(f'method name {method.long_name} is not formatted as expected (ClassName::MethodName).')
+                continue
             match_names = match.groupdict()
             class_name = match_names['class_name'] if 'class_name' in match_names else 'None'
             class_methods = output[class_name] if class_name in output else list()

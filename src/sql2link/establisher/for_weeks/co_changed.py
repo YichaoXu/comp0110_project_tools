@@ -60,11 +60,11 @@ class CoChangedInWeekLinkEstablisher(AbsLinkEstablisher):
         ),
         tested_modified AS (
             SELECT target_method_id AS tested_method_id, change_week FROM week_based_changes
-            WHERE file_path LIKE 'src/main/java/org/apache/commons/lang3/%'
+            WHERE file_path LIKE 'src/main%'
         ),
         test_modified AS (
             SELECT target_method_id AS test_method_id, change_week FROM week_based_changes
-            WHERE file_path LIKE 'src/test/java/org/apache/commons/lang3/%'
+            WHERE file_path LIKE 'src/test%'
         ),
         tested_count AS (
             SELECT tested_method_id, COUNT(*) AS changed_count FROM tested_modified

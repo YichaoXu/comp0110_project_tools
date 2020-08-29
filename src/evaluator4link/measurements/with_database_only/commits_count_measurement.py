@@ -59,10 +59,10 @@ class FileCommitsCountMeasurement(AbstractCommitsCountMeasurement):
             )
         ), test_files AS (
             SELECT DISTINCT file_path FROM git_methods
-            WHERE file_path LIKE 'src/test/java/org/apache/commons/lang3%'
+            WHERE file_path LIKE 'src/test%'
         ), tested_files AS (
             SELECT DISTINCT file_path FROM git_methods
-            WHERE file_path LIKE 'src/main/java/org/apache/commons/lang3%'
+            WHERE file_path LIKE 'src/main%'
         ), co_changed_commits AS (
             SELECT commit_hash FROM files_changes WHERE file_path IN test_files
             INTERSECT
@@ -84,10 +84,10 @@ class ClassCommitsCountMeasurement(AbstractCommitsCountMeasurement):
             )
         ), test_classes AS (
             SELECT DISTINCT (class_name || file_path) AS unique_class_id FROM git_methods
-            WHERE file_path LIKE 'src/test/java/org/apache/commons/lang3%'
+            WHERE file_path LIKE 'src/test%'
         ), tested_classes AS (
             SELECT DISTINCT (class_name || file_path) AS unique_class_id FROM git_methods
-            WHERE file_path LIKE 'src/main/java/org/apache/commons/lang3%'
+            WHERE file_path LIKE 'src/main%'
         ), co_changed_commits AS (
             SELECT commit_hash FROM classes_changes WHERE unique_class_id IN test_classes
             INTERSECT
@@ -103,9 +103,9 @@ class MethodCommitsCountMeasurement(AbstractCommitsCountMeasurement):
     @property
     def _count_changes_in_commit_sql_stmt(self) -> str: return '''
         WITH test_methods AS (
-            SELECT DISTINCT id FROM git_methods WHERE file_path LIKE 'src/test/java/org/apache/commons/lang3%'
+            SELECT DISTINCT id FROM git_methods WHERE file_path LIKE 'src/test%'
         ), tested_functions AS (
-            SELECT DISTINCT id FROM git_methods WHERE file_path LIKE 'src/main/java/org/apache/commons/lang3%'
+            SELECT DISTINCT id FROM git_methods WHERE file_path LIKE 'src/main%'
         ), co_changed_commits AS (
             SELECT commit_hash FROM git_changes WHERE target_method_id IN test_methods
             INTERSECT
@@ -121,9 +121,9 @@ class TestedCommitsCountMeasurement(AbstractCommitsCountMeasurement):
     @property
     def _count_changes_in_commit_sql_stmt(self) -> str: return '''
         WITH test_methods AS (
-            SELECT DISTINCT id FROM git_methods WHERE file_path LIKE 'src/test/java/org/apache/commons/lang3%'
+            SELECT DISTINCT id FROM git_methods WHERE file_path LIKE 'src/test%'
         ), tested_functions AS (
-            SELECT DISTINCT id FROM git_methods WHERE file_path LIKE 'src/main/java/org/apache/commons/lang3%'
+            SELECT DISTINCT id FROM git_methods WHERE file_path LIKE 'src/main%'
         ), co_changed_commits AS (
             SELECT commit_hash FROM git_changes WHERE target_method_id IN test_methods
             INTERSECT
@@ -140,9 +140,9 @@ class TestCommitsCountMeasurement(AbstractCommitsCountMeasurement):
     @property
     def _count_changes_in_commit_sql_stmt(self) -> str: return '''
         WITH test_methods AS (
-            SELECT DISTINCT id FROM git_methods WHERE file_path LIKE 'src/test/java/org/apache/commons/lang3%'
+            SELECT DISTINCT id FROM git_methods WHERE file_path LIKE 'src/test%'
         ), tested_functions AS (
-            SELECT DISTINCT id FROM git_methods WHERE file_path LIKE 'src/main/java/org/apache/commons/lang3%'
+            SELECT DISTINCT id FROM git_methods WHERE file_path LIKE 'src/main%'
         ), co_changed_commits AS (
             SELECT commit_hash FROM git_changes WHERE target_method_id IN test_methods
             INTERSECT

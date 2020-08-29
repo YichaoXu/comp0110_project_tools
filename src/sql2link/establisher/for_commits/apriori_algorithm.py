@@ -52,16 +52,16 @@ class AprioriInCommitLinkEstablisher(AbsLinkEstablisher):
             SELECT id AS test_id, support AS test_support FROM frequent_unique_table
             WHERE EXISTS( 
                 SELECT id FROM git_methods 
-                WHERE id = test_id AND file_path LIKE  'src/test/java/org/apache/commons/lang3/%'
+                WHERE id = test_id AND file_path LIKE  'src/test%'
             ) 
         ),
         frequent_tested_table AS (
             SELECT id AS tested_id, support AS tested_support FROM frequent_unique_table
             WHERE EXISTS( 
                 SELECT id FROM git_methods 
-                WHERE id = tested_id AND file_path LIKE 'src/main/java/org/apache/commons/lang3/%'
+                WHERE id = tested_id AND file_path LIKE 'src/main%'
             ) 
-            AND support > :min_support_for_change
+            AND support >= :min_support_for_change
         ),
         frequent_test_commits AS (
             SELECT commit_hash AS test_commit_hash, test_id, test_support
@@ -78,10 +78,10 @@ class AprioriInCommitLinkEstablisher(AbsLinkEstablisher):
                 frequent_test_commits JOIN frequent_tested_commits
                 ON test_commit_hash = tested_commit_hash
             )GROUP BY tested_id, test_id
-            HAVING cochange_support > :min_support_for_cochange
+            HAVING cochange_support >= :min_support_for_cochange
         )
         
         SELECT tested_id, test_id, cochange_support, CAST(cochange_support AS FLOAT)/test_support AS confidence
         FROM frequent_cochange_table
-        WHERE confidence > :min_confidence
+        WHERE confidence >= :min_confidence
         '''

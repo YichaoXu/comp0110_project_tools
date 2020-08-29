@@ -66,7 +66,7 @@ class CoChangedtedForSeparateChangeTypeFilteredWeekLinkEstablisher(AbstractCoCha
         ),
         tested_functions AS (
             SELECT id FROM git_methods
-            WHERE file_path LIKE 'src/main/java/org/apache/commons/lang3/%'
+            WHERE file_path LIKE 'src/main%'
         ),
         tested_changes AS (
             SELECT target_method_id AS tested_id, change_week FROM filtered_change
@@ -74,7 +74,7 @@ class CoChangedtedForSeparateChangeTypeFilteredWeekLinkEstablisher(AbstractCoCha
         ),
         test_methods AS (
             SELECT id FROM git_methods
-            WHERE file_path LIKE 'src/test/java/org/apache/commons/lang3/%'
+            WHERE file_path LIKE 'src/test%'
         ),
         test_changes AS (
             SELECT target_method_id AS test_id, change_week FROM filtered_change
@@ -131,7 +131,7 @@ class CoChangedtedForAllChangeTypeFilteredWeekLinkEstablisher(AbstractCoChangedW
         ),
         tested_functions AS (
             SELECT id FROM git_methods
-            WHERE file_path LIKE 'src/main/java/org/apache/commons/lang3/%'
+            WHERE file_path LIKE 'src/main%'
         ),
         tested_changes AS (
             SELECT target_method_id AS tested_id, change_week FROM filtered_change
@@ -139,7 +139,7 @@ class CoChangedtedForAllChangeTypeFilteredWeekLinkEstablisher(AbstractCoChangedW
         ),
         test_methods AS (
             SELECT id FROM git_methods
-            WHERE file_path LIKE 'src/test/java/org/apache/commons/lang3/%'
+            WHERE file_path LIKE 'src/test%'
         ),
         test_changes AS (
             SELECT target_method_id AS test_id, change_week FROM filtered_change

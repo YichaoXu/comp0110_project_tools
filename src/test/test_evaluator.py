@@ -1,18 +1,18 @@
+import csv
 import os
-from typing import List, Tuple, Dict, Optional
+import sqlite3
+import pandas as pd
+from typing import List, Tuple, Dict, Optional, Set
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 from mpl_toolkits.mplot3d import Axes3D
-
 from evaluator4link.evaluator import LinkEvaluator
-from evaluator4link.measurements.with_database_only.weeks_count_measurement import FileWeeksCountMeasurement, \
-    ClassWeeksCountMeasurement, MethodWeeksCountMeasurement, TestedWeeksCountMeasurement, TestWeeksCountMeasurement
+from evaluator4link.measurements.with_ground_truth.for_common_strategy.precision_recall_f1 import \
+    PrecisionRecallMeasurementClassLevel
+from sql2link import TraceabilityPredictor, LinkStrategy, LinkBase
 
-path_to_comp0110 = os.path.expanduser('~/Project/PycharmProjects/comp0110')
-path_to_tmp = f'{path_to_comp0110}/.tmp'
-path_to_db = f'{path_to_tmp}/commons_lang.db'
-path_to_csv = f'{path_to_tmp}/commons_lang.csv'
+
 
 def draw_figure_for_co_changed(predicted_links: List[float]):
     plt.figure(num=1, figsize=(30, 5))
@@ -64,12 +64,30 @@ def draw_3D_for_co_changed():
 
 def print_complete_report() -> None:
     evaluate_report = LinkEvaluator(path_to_db, path_to_csv)
-    print(evaluate_report.precision_recall_and_f1_score_of_strategy('co_created_for_commits'))
-    print(evaluate_report.precision_recall_and_f1_score_of_strategy('co_changed_for_commits'))
-    print(evaluate_report.precision_recall_and_f1_score_of_strategy('apriori_for_commits'))
-    print(evaluate_report.precision_recall_and_f1_score_of_strategy('co_created_for_weeks'))
-    print(evaluate_report.precision_recall_and_f1_score_of_strategy('co_changed_for_weeks'))
-    print(evaluate_report.precision_recall_and_f1_score_of_strategy('apriori_for_weeks'))
+    print(
+        'links_commits_based_apriori: ',
+        evaluate_report.precision_recall_and_f1_score_of_strategy('links_commits_based_apriori')
+    )
+    print(
+        'links_commits_based_cochanged: ',
+        evaluate_report.precision_recall_and_f1_score_of_strategy('links_commits_based_cochanged')
+    )
+    print(
+        'links_commits_based_cocreated: ',
+        evaluate_report.precision_recall_and_f1_score_of_strategy('links_commits_based_cocreated')
+    )
+    print(
+        'links_weeks_based_apriori: ',
+        evaluate_report.precision_recall_and_f1_score_of_strategy('links_weeks_based_apriori')
+    )
+    print(
+        'links_weeks_based_cochanged: ',
+        evaluate_report.precision_recall_and_f1_score_of_strategy('links_weeks_based_cochanged')
+    )
+    print(
+        'links_weeks_based_cocreated: ',
+        evaluate_report.precision_recall_and_f1_score_of_strategy('links_weeks_based_cocreated')
+    )
     return None
 
 
@@ -207,12 +225,14 @@ def draw_2d_fig_for_test_and_tested_and_commits():
 
 
 def draw_box_plot_for_changes_in_commits(
-        files : List[Tuple[int, int, int]],
-        classes : List[Tuple[int, int, int]],
-        methods : List[Tuple[int, int, int]],
-        tests : List[Tuple[int, int, int]],
-        testeds : List[Tuple[int, int, int]]
+    path_to_db: str, path_to_csv: str
 ):
+    evaluator4links = LinkEvaluator(path_to_db, path_to_csv)
+    files = evaluator4links.coordinates_for_files_changes_distribution_of_commits()
+    classes = evaluator4links.coordinates_for_classes_changes_distribution_of_commits()
+    testeds = evaluator4links.coordinates_for_tested_changes_distribution_of_commits()
+    tests = evaluator4links.coordinates_for_test_changes_distribution_of_commits()
+    methods = evaluator4links.coordinates_for_methods_changes_distribution_of_commits()
 
     def __draw_box_plot(
             axes: Axes, change_coordinates: List[Tuple[int, int, int]],title: str,
@@ -245,19 +265,150 @@ def draw_box_plot_for_changes_in_commits(
         return None
 
     fig = plt.figure(num=5, figsize=(25, 25))
-    __draw_box_plot(fig.add_subplot(511), files, 'changes for files')
-    __draw_box_plot(fig.add_subplot(512), classes, 'changes for classes')
-    __draw_box_plot(fig.add_subplot(513), methods, 'changes for methods')
-    __draw_box_plot(fig.add_subplot(514), tests, 'changes for test')
-    __draw_box_plot(fig.add_subplot(515), testeds, 'changes for tested')
+    __draw_box_plot(fig.add_subplot(511), files.commits_count_coordinates, 'changes for files')
+    __draw_box_plot(fig.add_subplot(512), classes.commits_count_coordinates, 'changes for classes')
+    __draw_box_plot(fig.add_subplot(513), methods.commits_count_coordinates, 'changes for methods')
+    __draw_box_plot(fig.add_subplot(514), tests.commits_count_coordinates, 'changes for test')
+    __draw_box_plot(fig.add_subplot(515), testeds.commits_count_coordinates, 'changes for tested')
     plt.show()
 
 
-if __name__ == '__main__':
+def theory_max_precision():
     evaluator = LinkEvaluator(path_to_db, path_to_csv)
-    report = evaluator.precision_recall_and_f1_score_of_strategy('links_weeks_based_cochanged')
-    print(report)
+    report = evaluator.co_changed_commits()
+    co_changes_commits = report.co_changes_commits
+    commits_id_mapping = report.commit_hash_to_id_mapping
 
+    commit_method_pairs: Dict[str, Set[Tuple[int, int]]] = dict()
+    for method_pair, commit_ids in co_changes_commits.items():
+        for commit_id in commit_ids:
+            commit_hash = report.from_commit_id_to_hash(commit_id)
+            commit_method_pairs.setdefault(commit_hash, set())
+            commit_method_pairs[commit_hash].add(method_pair)
+
+    path_to_gt_count = f'{path_to_tmp}/table_for_ground_truth_occurred_commits.csv'
+    csv_data = pd.read_csv(path_to_gt_count, index_col=0)
+    commits_count: Dict[str, int] = dict()
+    for commits in co_changes_commits.values():
+        for commit_id in commits:
+            commit_hash = report.from_commit_id_to_hash(commit_id)
+            commit_count = csv_data.loc[commit_hash][-2]
+            if commit_hash in commits_count: continue
+            if commit_count > 14 or commit_count < 3: continue
+            commits_count[commit_hash] = commit_count
+
+    sorted_commits = sorted(commits_count.keys(), key=lambda hash_val: (commits_count[hash_val]))
+    min_commits = set()
+    cur_methods_scope = set()
+    for commit_hash in sorted_commits:
+        method_pairs = commit_method_pairs[commit_hash]
+        if cur_methods_scope.issuperset(method_pairs):
+            continue
+        cur_methods_scope.update(method_pairs)
+        min_commits.add(commit_hash)
+
+    db_connection = sqlite3.connect(path_to_db)
+
+    def find_all_links_in_commits(commit_hash: str) -> Set[Tuple[int, int]]:
+        db_cursor = db_connection.cursor()
+        exe_rst = db_cursor.execute(f'''
+            WITH test_methods AS (
+                SELECT id FROM git_methods
+                WHERE file_path LIKE 'src/test/java/org/apache/commons/lang3%'
+            ), tested_functions AS (
+                SELECT id FROM git_methods
+                WHERE file_path LIKE 'src/main/java/org/apache/commons/lang3%'
+            ), changes_test_in_commits AS (
+                SELECT target_method_id AS test_id FROM  git_changes
+                WHERE commit_hash = :commit_hash
+                AND target_method_id IN test_methods
+            ), changes_tested_in_commits AS (
+                SELECT target_method_id AS tested_id FROM  git_changes
+                WHERE commit_hash = :commit_hash
+                AND target_method_id IN tested_functions
+            )
+            SELECT DISTINCT tested_id, test_id
+            FROM changes_test_in_commits
+            LEFT OUTER JOIN changes_tested_in_commits
+        ''', {'commit_hash': commit_hash})
+        return {(int(row[0]), int(row[1])) for row in exe_rst.fetchall() if row is not None and len(row) == 2}
+
+    predicated_pairs = set()
+    test_ids = set(report.test_changed_commits.keys())
+    for commit_hash in min_commits:
+        candidate = find_all_links_in_commits(commit_hash)
+        for pair in candidate:
+            if pair[1] in test_ids: predicated_pairs.add(pair)
+
+    print(len(predicated_pairs))
+
+def loop_for_precision(path_to_csv: str, path_to_db: str, max_range: range):
+    sql2linker = TraceabilityPredictor(path_to_db)
+    evaluator4link = LinkEvaluator(path_to_db, path_to_csv)
+    cochanged_res = 'links_filtered_commits_based_cochanged'
+    reports = list()
+    for total_max in max_range:
+        sql2linker.run_with_filter(
+            LinkStrategy.COCHANGE,
+            LinkBase.FOR_COMMITS,
+            parameters={
+                'changes_count_max': total_max,
+                'changes_count_min': 0
+            },
+            is_previous_ignored=True,
+            is_for_all=True
+        )
+        report = evaluator4link.precision_recall_and_f1_score_of_strategy(cochanged_res)
+        reports.append(report)
+    X_es = max_range
+    Y_precisions = np.array([report.precision for report in reports])
+    Y_recalls = np.array([report.recall for report in reports])
+    Y_f1s = np.array([report.f1_score for report in reports])
+    plt.figure(num=1, figsize=(10, 5))
+    plt.plot(X_es, Y_precisions, color='red', linewidth=1, label='Precision')
+    plt.plot(X_es, Y_recalls, color='blue', linestyle='--', linewidth=1, label='Recall')
+    plt.plot(X_es, Y_f1s, color='orange', linestyle='-.', linewidth=1, label='F1 Score')
+    plt.xlabel('Max Change Count')
+    plt.ylabel('Measurements')
+    plt.legend(loc='upper right')
+    plt.show()
+
+
+def loop_for_precision_class(path_to_csv: str, path_to_db: str, max_range: range):
+    establisher = TraceabilityPredictor(path_to_db)
+    strategy = 'links_filtered_commits_based_cochanged_classes'
+    reports = list()
+    for max_value in max_range:
+        establisher.run_class_level_with_filter(
+            LinkStrategy.COCHANGE,
+            LinkBase.FOR_COMMITS,
+            parameters={
+                'changes_count_max': max_value,
+                'changes_count_min': 0
+            },
+            is_previous_ignored=True
+        )
+        report = PrecisionRecallMeasurementClassLevel(path_to_db, path_to_csv,strategy)
+        reports.append(report)
+    X_es = max_range
+    Y_precisions = np.array([report.precision for report in reports])
+    Y_recalls = np.array([report.recall for report in reports])
+    Y_f1s = np.array([report.f1_score for report in reports])
+    plt.figure(num=1, figsize=(10, 5))
+    plt.plot(X_es, Y_precisions, color='red', linewidth=1, label='Precision')
+    plt.plot(X_es, Y_recalls, color='blue', linestyle='--', linewidth=1, label='Recall')
+    plt.plot(X_es, Y_f1s, color='orange', linestyle='-.', linewidth=1, label='F1 Score')
+    plt.xlabel('Max Change Count')
+    plt.ylabel('Measurements')
+    plt.legend(loc='upper right')
+    plt.show()
+
+if __name__ == '__main__':
+    path_to_comp0110 = os.path.expanduser('~/Project/PycharmProjects/comp0110')
+    path_to_tmp = f'{path_to_comp0110}/.tmp'
+    path_to_db = f'{path_to_tmp}/ant.db'
+    path_to_csv = f'{path_to_tmp}/-oracle-method-links.csv'
+    loop_for_precision(path_to_csv, path_to_db, range(3, 80))
 
 
 
