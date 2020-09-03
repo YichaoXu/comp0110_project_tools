@@ -45,27 +45,35 @@ class CoChangedInCommitLinkEstablisher(AbsLinkEstablisher):
                 git_changes  INNER JOIN valid_methods
                 ON valid_methods.id = git_changes.target_method_id
             )
-            WHERE file_path LIKE 'src/main%'
+            WHERE file_path LIKE :tested_path
         ), test_methods AS (
             SELECT valid_methods.id AS test_method_id, commit_hash FROM (
                 git_changes INNER JOIN valid_methods
                 ON valid_methods.id = git_changes.target_method_id
             )
-            WHERE valid_methods.file_path LIKE 'src/test%'
+            WHERE valid_methods.file_path LIKE :test_path
         ), tested_change_count AS (
             SELECT tested_method_id AS count_id, COUNT(tested_method_id) AS change_num FROM tested_methods
             GROUP BY tested_method_id
         ), co_change_table AS (
-            SELECT tested_method_id, test_method_id, COUNT(*) AS support FROM (
-                tested_methods INNER JOIN test_methods
+            SELECT tested_method_id, test_method_id, COUNT(*) AS support 
+            FROM tested_methods INNER JOIN test_methods
                 ON test_methods.commit_hash = tested_methods.commit_hash
-            )
             GROUP BY tested_method_id, test_method_id
+        ), most_frequent_co_changes AS (
+            SELECT tested_method_id, test_method_id, support 
+            FROM co_change_table
+            GROUP BY test_method_id
+                HAVING MAX(support)
         )
-        SELECT tested_method_id, test_method_id, support, CAST(support AS FLOAT)/change_num AS confidence FROM (
-            co_change_table INNER JOIN tested_change_count
+        SELECT 
+            tested_method_id, 
+            test_method_id, 
+            support, 
+            CAST(support AS FLOAT)/change_num AS confidence 
+        FROM most_frequent_co_changes 
+        INNER JOIN tested_change_count
             ON tested_method_id = count_id
-        )
     '''
 
 
@@ -112,10 +120,10 @@ class CoChangedInCommitClassLevelLinkEstablisher(AbsLinkEstablisher):
             AND simple_name NOT LIKE ('for(int i%')
         ), tested_functions AS (
             SELECT id AS tested_id, class_name, file_path FROM valid_methods 
-            WHERE file_path LIKE 'src/main%'        
+            WHERE file_path LIKE :tested_path        
         ), test_methods AS (
             SELECT id AS test_id, class_name, file_path FROM valid_methods 
-            WHERE file_path LIKE 'src/test%'        
+            WHERE file_path LIKE :test_path        
         ), tested_classes_changes AS (
             SELECT DISTINCT 
                 class_name AS tested_class, 

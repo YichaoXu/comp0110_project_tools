@@ -23,10 +23,11 @@ def mining_jfreechart():
         f'{path_to_comp0110}/example_repositories/jfreechart'
     ).mining(to_commit='b3f5f21ba0fe32a8f7eccb6760a79df30628be3e')
     sql2linker = TraceabilityPredictor(f'{path_to_comp0110}/.tmp/jfreechart.db')
-    sql2linker.run(LinkStrategy.COCREATE, LinkBase.FOR_COMMITS)
-    sql2linker.run(LinkStrategy.COCHANGE, LinkBase.FOR_COMMITS)
-    sql2linker.run(LinkStrategy.COCREATE, LinkBase.FOR_WEEKS)
-    sql2linker.run(LinkStrategy.COCHANGE, LinkBase.FOR_WEEKS)
+    specific_paths = {'tested_path': 'source/org/jfree/chart/%', 'test_path': 'tests/org/jfree/chart/%'}
+    sql2linker.run(LinkStrategy.COCREATE, LinkBase.FOR_COMMITS, parameters=specific_paths)
+    sql2linker.run(LinkStrategy.COCHANGE, LinkBase.FOR_COMMITS, parameters=specific_paths)
+    sql2linker.run(LinkStrategy.COCREATE, LinkBase.FOR_WEEKS, parameters=specific_paths)
+    sql2linker.run(LinkStrategy.COCHANGE, LinkBase.FOR_WEEKS, parameters=specific_paths)
 
 
 def mining_ant():
@@ -44,4 +45,4 @@ def mining_ant():
 
 
 if __name__ == '__main__':
-    mining_commons_io()
+    mining_jfreechart()

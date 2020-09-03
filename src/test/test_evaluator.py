@@ -1,4 +1,4 @@
-import csv
+from matplotlib.backends.backend_pdf import PdfPages
 import os
 import sqlite3
 import pandas as pd
@@ -7,9 +7,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 from mpl_toolkits.mplot3d import Axes3D
-from evaluator4link.evaluator import LinkEvaluator
+from pandas import DataFrame
+
+from evaluator4link.evaluator import LinkEvaluator, FileCommitsCountMeasurement, ClassCommitsCountMeasurement, \
+    TestedCommitsCountMeasurement, TestCommitsCountMeasurement, MethodCommitsCountMeasurement
 from evaluator4link.measurements.with_ground_truth.for_common_strategy.precision_recall_f1 import \
-    PrecisionRecallMeasurementClassLevel
+    PrecisionRecallMeasurementClassLevel, PrecisionRecallMeasurement
 from sql2link import TraceabilityPredictor, LinkStrategy, LinkBase
 
 
@@ -224,18 +227,21 @@ def draw_2d_fig_for_test_and_tested_and_commits():
     plt.show()
 
 
+
 def draw_box_plot_for_changes_in_commits(
-    path_to_db: str, path_to_csv: str
+    path_to_db: str, specific_test_path: str = 'src/test%', specific_tested_path: str = 'src/main%'
 ):
-    evaluator4links = LinkEvaluator(path_to_db, path_to_csv)
-    files = evaluator4links.coordinates_for_files_changes_distribution_of_commits()
-    classes = evaluator4links.coordinates_for_classes_changes_distribution_of_commits()
-    testeds = evaluator4links.coordinates_for_tested_changes_distribution_of_commits()
-    tests = evaluator4links.coordinates_for_test_changes_distribution_of_commits()
-    methods = evaluator4links.coordinates_for_methods_changes_distribution_of_commits()
+    files = FileCommitsCountMeasurement(path_to_db,specific_test_path,specific_tested_path)
+    classes = ClassCommitsCountMeasurement(path_to_db,specific_test_path,specific_tested_path)
+    testeds = TestedCommitsCountMeasurement(path_to_db,specific_test_path,specific_tested_path)
+    tests = TestCommitsCountMeasurement(path_to_db,specific_test_path,specific_tested_path)
+    methods = MethodCommitsCountMeasurement(path_to_db,specific_test_path,specific_tested_path)
+    fig = plt.figure(num=5, figsize=(25, 25))
 
     def __draw_box_plot(
-            axes: Axes, change_coordinates: List[Tuple[int, int, int]],title: str,
+            axes: Axes,
+            change_coordinates: List[Tuple[int, int, int]],
+            title: str,
     ) -> None:
         added_dict, modified_dict, renamed_dict, total_dict = dict(), dict(), dict(), dict()
         for commit_x, count_y, type_c in change_coordinates:
@@ -264,7 +270,6 @@ def draw_box_plot_for_changes_in_commits(
         )
         return None
 
-    fig = plt.figure(num=5, figsize=(25, 25))
     __draw_box_plot(fig.add_subplot(511), files.commits_count_coordinates, 'changes for files')
     __draw_box_plot(fig.add_subplot(512), classes.commits_count_coordinates, 'changes for classes')
     __draw_box_plot(fig.add_subplot(513), methods.commits_count_coordinates, 'changes for methods')
@@ -277,7 +282,6 @@ def theory_max_precision():
     evaluator = LinkEvaluator(path_to_db, path_to_csv)
     report = evaluator.co_changed_commits()
     co_changes_commits = report.co_changes_commits
-    commits_id_mapping = report.commit_hash_to_id_mapping
 
     commit_method_pairs: Dict[str, Set[Tuple[int, int]]] = dict()
     for method_pair, commit_ids in co_changes_commits.items():
@@ -342,9 +346,16 @@ def theory_max_precision():
 
     print(len(predicated_pairs))
 
-def loop_for_precision(path_to_csv: str, path_to_db: str, max_range: range):
+
+def loop_for_precision(
+    path_to_db: str,
+    path_to_csv: str,
+    max_range: range,
+    test_path: str = 'src/test%',
+    tested_path: str = 'src/main%',
+    is_verbose: bool = False
+):
     sql2linker = TraceabilityPredictor(path_to_db)
-    evaluator4link = LinkEvaluator(path_to_db, path_to_csv)
     cochanged_res = 'links_filtered_commits_based_cochanged'
     reports = list()
     for total_max in max_range:
@@ -353,42 +364,47 @@ def loop_for_precision(path_to_csv: str, path_to_db: str, max_range: range):
             LinkBase.FOR_COMMITS,
             parameters={
                 'changes_count_max': total_max,
-                'changes_count_min': 0
+                'changes_count_min': 0,
+                'test_path': test_path,
+                'tested_path': tested_path
             },
             is_previous_ignored=True,
             is_for_all=True
         )
-        report = evaluator4link.precision_recall_and_f1_score_of_strategy(cochanged_res)
+        report = PrecisionRecallMeasurement(path_to_db, path_to_csv, cochanged_res)
+        if is_verbose: print(total_max, report)
         reports.append(report)
     X_es = max_range
     Y_precisions = np.array([report.precision for report in reports])
     Y_recalls = np.array([report.recall for report in reports])
     Y_f1s = np.array([report.f1_score for report in reports])
-    plt.figure(num=1, figsize=(10, 5))
+    f=plt.figure(num=1, figsize=(10, 5))
     plt.plot(X_es, Y_precisions, color='red', linewidth=1, label='Precision')
     plt.plot(X_es, Y_recalls, color='blue', linestyle='--', linewidth=1, label='Recall')
     plt.plot(X_es, Y_f1s, color='orange', linestyle='-.', linewidth=1, label='F1 Score')
     plt.xlabel('Max Change Count')
     plt.ylabel('Measurements')
     plt.legend(loc='upper right')
-    plt.show()
+    f.savefig(f"{path_to_db.split('/')[-1]}.pdf", bbox_inches='tight')
+    plt.close()
 
 
-def loop_for_precision_class(path_to_csv: str, path_to_db: str, max_range: range):
+def loop_for_precision_class(path_to_csv: str, path_to_db: str, max_range: range, is_verbose: bool = False):
     establisher = TraceabilityPredictor(path_to_db)
-    strategy = 'links_filtered_commits_based_cochanged_classes'
+    strategy = 'links_filtered_commits_based_cocreated_classes'
     reports = list()
     for max_value in max_range:
         establisher.run_class_level_with_filter(
-            LinkStrategy.COCHANGE,
+            LinkStrategy.COCREATE,
             LinkBase.FOR_COMMITS,
             parameters={
-                'changes_count_max': max_value,
-                'changes_count_min': 0
+                'add_count_max': max_value,
+                'add_count_min': 0
             },
             is_previous_ignored=True
         )
         report = PrecisionRecallMeasurementClassLevel(path_to_db, path_to_csv,strategy)
+        if is_verbose: print(report)
         reports.append(report)
     X_es = max_range
     Y_precisions = np.array([report.precision for report in reports])
@@ -406,9 +422,32 @@ def loop_for_precision_class(path_to_csv: str, path_to_db: str, max_range: range
 if __name__ == '__main__':
     path_to_comp0110 = os.path.expanduser('~/Project/PycharmProjects/comp0110')
     path_to_tmp = f'{path_to_comp0110}/.tmp'
-    path_to_db = f'{path_to_tmp}/ant.db'
-    path_to_csv = f'{path_to_tmp}/-oracle-method-links.csv'
-    loop_for_precision(path_to_csv, path_to_db, range(3, 80))
+    strategy = 'links_commits_based_cochanged'
+    TraceabilityPredictor(f'{path_to_tmp}/commons_lang.db').run(
+        LinkStrategy.COCHANGE,
+        LinkBase.FOR_COMMITS,
+        ignore_previous=True
+    )
+    TraceabilityPredictor(f'{path_to_tmp}/commons_io.db').run(
+        LinkStrategy.COCHANGE,
+        LinkBase.FOR_COMMITS,
+        ignore_previous=True
+    )
+
+    TraceabilityPredictor(f'{path_to_tmp}/jfreechart.db').run(
+        LinkStrategy.COCHANGE,
+        LinkBase.FOR_COMMITS,
+        ignore_previous=True,
+        parameters={
+            'tested_path': 'source%',
+            'test_path': 'test%'
+        }
+    )
+
+    loop_for_precision()
+
+
+
 
 
 

@@ -52,14 +52,14 @@ class AprioriInCommitLinkEstablisher(AbsLinkEstablisher):
             SELECT id AS test_id, support AS test_support FROM frequent_unique_table
             WHERE EXISTS( 
                 SELECT id FROM git_methods 
-                WHERE id = test_id AND file_path LIKE  'src/test%'
+                WHERE id = test_id AND file_path LIKE  :test_path
             ) 
         ),
         frequent_tested_table AS (
             SELECT id AS tested_id, support AS tested_support FROM frequent_unique_table
             WHERE EXISTS( 
                 SELECT id FROM git_methods 
-                WHERE id = tested_id AND file_path LIKE 'src/main%'
+                WHERE id = tested_id AND file_path LIKE :tested_path
             ) 
             AND support >= :min_support_for_change
         ),

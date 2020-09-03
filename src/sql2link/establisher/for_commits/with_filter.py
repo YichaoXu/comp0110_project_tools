@@ -53,13 +53,13 @@ class CoChangedtedForSeparateChangeTypeFilteredCommitLinkEstablisher(AbsLinkEsta
                 filtered_change INNER JOIN valid_methods
                 ON valid_methods.id = filtered_change.target_method_id
             )
-            WHERE file_path LIKE 'src/main%'
+            WHERE file_path LIKE :tested_path
         ), test_methods AS (
             SELECT valid_methods.id AS test_method_id, commit_hash FROM (
                 filtered_change INNER JOIN valid_methods
                 ON valid_methods.id = filtered_change.target_method_id
             )
-            WHERE valid_methods.file_path LIKE 'src/test%'
+            WHERE valid_methods.file_path LIKE :test_path
         ), tested_change_count AS (
             SELECT tested_method_id AS count_id, COUNT(tested_method_id) AS change_num FROM tested_functions
             GROUP BY tested_method_id
@@ -126,13 +126,13 @@ class CoChangedtedForAllChangeTypeFilteredCommitLinkEstablisher(AbsLinkEstablish
             FROM filtered_change 
             INNER JOIN valid_methods
                 ON valid_methods.id = filtered_change.target_method_id
-            WHERE file_path LIKE 'src/main%'
+            WHERE file_path LIKE :tested_path
         ), test_methods AS (
             SELECT valid_methods.id AS test_method_id, commit_hash
             FROM filtered_change 
             INNER JOIN valid_methods
                 ON valid_methods.id = filtered_change.target_method_id
-            WHERE valid_methods.file_path LIKE 'src/test%'
+            WHERE valid_methods.file_path LIKE :test_path
         ), test_change_count AS (
             SELECT test_method_id AS count_id, COUNT(*) AS change_num 
             FROM test_methods
@@ -199,13 +199,13 @@ class CoCreatedWithFilteredCommitLinkEstablisher(AbsLinkEstablisher):
                 filtered_change INNER JOIN valid_methods
                 ON valid_methods.id = filtered_change.target_method_id
             )
-            WHERE file_path LIKE 'src/main%'
+            WHERE file_path LIKE :tested_path
         ), test_methods AS (
             SELECT valid_methods.id AS test_method_id, commit_hash FROM (
                 filtered_change INNER JOIN valid_methods
                 ON valid_methods.id = filtered_change.target_method_id
             )
-            WHERE valid_methods.file_path LIKE 'src/test%'
+            WHERE valid_methods.file_path LIKE :test_path
         )
         SELECT tested_method_id, test_method_id FROM (
             tested_functions INNER JOIN test_methods
@@ -265,13 +265,13 @@ class AprioriWithFilteredCommitLinkEstablisher(AbsLinkEstablisher):
             FROM filtered_change 
             INNER JOIN valid_methods
                 ON valid_methods.id = filtered_change.target_method_id
-            WHERE file_path LIKE 'src/main%'
+            WHERE file_path LIKE :tested_path
         ), test_changes AS (
             SELECT valid_methods.id AS test_method_id, commit_hash 
             FROM filtered_change 
             INNER JOIN valid_methods
                 ON valid_methods.id = filtered_change.target_method_id
-            WHERE valid_methods.file_path LIKE 'src/test%'
+            WHERE valid_methods.file_path LIKE :test_path
         ), tested_functions_count AS (
             SELECT tested_method_id, COUNT(*) AS tested_count 
             FROM tested_changes
@@ -365,13 +365,13 @@ class CoChangedInCommitClassLevelLinkEstablisherWithFilter(AbsLinkEstablisher):
                 class_name AS tested_class,
                 file_path AS tested_file
             FROM valid_methods
-            WHERE tested_file LIKE 'src/main%'
+            WHERE tested_file LIKE :tested_path
         ), test_classes AS (
             SELECT DISTINCT
                 class_name AS test_class,
                 file_path AS test_file
             FROM valid_methods
-            WHERE test_file LIKE 'src/test%'
+            WHERE test_file LIKE :test_path
         ), tested_classes_changes AS (
             SELECT DISTINCT tested_class, tested_file, commit_hash
             FROM class_changes

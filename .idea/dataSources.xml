@@ -13,5 +13,11 @@
       <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
       <jdbc-url>jdbc:sqlite:$PROJECT_DIR$/../.tmp/complete_commons_lang.db</jdbc-url>
     </data-source>
+    <data-source source="LOCAL" name="jfreechart.db" uuid="b011d3c2-bd37-4b25-8e68-2b22dfd7a454">
+      <driver-ref>sqlite.xerial</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
+      <jdbc-url>jdbc:sqlite:$PROJECT_DIR$/../.tmp/jfreechart.db</jdbc-url>
+    </data-source>
   </component>
 </project>
