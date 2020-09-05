@@ -43,6 +43,9 @@ def mining_ant():
     sql2linker.run(LinkStrategy.COCHANGE, LinkBase.FOR_WEEKS)
 
 
-
 if __name__ == '__main__':
-    mining_jfreechart()
+    path_to_comp0110 = os.path.expanduser('~/Project/PycharmProjects/comp0110')
+    DataMiner(
+        f'{path_to_comp0110}/.tmp',
+        f'{path_to_comp0110}/example_repositories/guava'
+    ).mining()

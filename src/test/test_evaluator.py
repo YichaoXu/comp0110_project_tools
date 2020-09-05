@@ -420,31 +420,89 @@ def loop_for_precision_class(path_to_csv: str, path_to_db: str, max_range: range
     plt.show()
 
 if __name__ == '__main__':
+    addeds, modifieds, renameds, totals = list(), list(), list(), list()
+
+    def __classify_changes(
+            change_coordinates: List[Tuple[int, int, int]],
+    ) -> None:
+        added_dict, modified_dict, renamed_dict, total_dict = dict(), dict(), dict(), dict()
+        for commit_x, count_y, type_c in change_coordinates:
+            added_dict.setdefault(commit_x, 0)
+            modified_dict.setdefault(commit_x, 0)
+            renamed_dict.setdefault(commit_x, 0)
+            total_dict.setdefault(commit_x, 0)
+            if type_c == 1:
+                added_dict[commit_x] = count_y
+            elif type_c == 2:
+                modified_dict[commit_x] = count_y
+            elif type_c == 3:
+                renamed_dict[commit_x] = count_y
+            else:
+                continue
+            total_dict[commit_x] += count_y
+        addeds.append([count for count in added_dict.values()])
+        modifieds.append([count for count in modified_dict.values()])
+        renameds.append([count for count in renamed_dict.values()])
+        totals.append([count for count in total_dict.values()])
+        return None
+
     path_to_comp0110 = os.path.expanduser('~/Project/PycharmProjects/comp0110')
     path_to_tmp = f'{path_to_comp0110}/.tmp'
-    strategy = 'links_commits_based_cochanged'
-    TraceabilityPredictor(f'{path_to_tmp}/commons_lang.db').run(
-        LinkStrategy.COCHANGE,
-        LinkBase.FOR_COMMITS,
-        ignore_previous=True
-    )
-    TraceabilityPredictor(f'{path_to_tmp}/commons_io.db').run(
-        LinkStrategy.COCHANGE,
-        LinkBase.FOR_COMMITS,
-        ignore_previous=True
-    )
+    strategy = 'links_commits_based_cocreated'
 
-    TraceabilityPredictor(f'{path_to_tmp}/jfreechart.db').run(
-        LinkStrategy.COCHANGE,
-        LinkBase.FOR_COMMITS,
-        ignore_previous=True,
-        parameters={
-            'tested_path': 'source%',
-            'test_path': 'test%'
-        }
-    )
+    lang_method_coords = MethodCommitsCountMeasurement(
+        f'{path_to_tmp}/commons_lang.db'
+    ).commits_count_coordinates
+    __classify_changes(lang_method_coords)
 
-    loop_for_precision()
+    io_method_coords = MethodCommitsCountMeasurement(
+        f'{path_to_tmp}/commons_io.db'
+    ).commits_count_coordinates
+    __classify_changes(io_method_coords)
+
+    jfreechart_method_coords = MethodCommitsCountMeasurement(
+        f'{path_to_tmp}/jfreechart.db',
+        path_to_test='test%',
+        path_to_tested='source%'
+    ).commits_count_coordinates
+    __classify_changes(jfreechart_method_coords)
+
+    plt.boxplot(
+        x=[totals[0], totals[1], totals[2]],
+        positions=[2, 4, 6],
+        labels=('Commons-Lang', 'Commons-IO', 'JFreeChart'),
+        vert=False,
+        showfliers=False
+    )
+    plt.boxplot(
+        x=[addeds[0], addeds[1], addeds[2]],
+        positions=[1.5, 3.5, 5.5],
+        labels=('', '', ''),
+        boxprops={'color':'red'},
+        vert=False,
+        showfliers=False
+    )
+    plt.boxplot(
+        x=[modifieds[0], modifieds[1], modifieds[2]],
+        positions=[1, 3, 5],
+        labels=('', '', ''),
+        boxprops={'color':'blue'},
+        vert=False,
+        showfliers=False
+    )
+    plt.boxplot(
+        x=[renameds[0], renameds[1], renameds[2]],
+        positions=[0.5, 2.5, 4.5],
+        labels=('', '', ''),
+        boxprops={'color':'green'},
+        vert=False,
+        showfliers=False
+    )
+    plt.grid()
+    plt.xlabel('change count')
+    plt.savefig(f"change_distribution_per_commit.pdf", bbox_inches='tight')
+    plt.show()
+
 
 
 
