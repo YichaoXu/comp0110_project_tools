@@ -33,47 +33,60 @@ class CoChangedtedForSeparateChangeTypeFilteredCommitLinkEstablisher(AbsLinkEsta
     @property
     def _link_establishing_sql(self) -> str: return '''
         WITH commits_changes_count AS (
-            SELECT commit_hash, change_type, COUNT(*) AS change_count FROM git_changes
-            GROUP BY commit_hash, change_type
-        ),
-        invalid_commits AS (
-            SELECT DISTINCT commit_hash FROM commits_changes_count
-            WHERE (change_type == 'ADD' AND change_count > :add_count_limits)
-            OR (change_type == 'MODIFY' AND change_count > :modify_count_limits)
-            OR (change_type == 'RENAME' AND change_count > :rename_count_limits)
-        ), filtered_change AS (
+            SELECT
+                commit_hash,
+                COUNT(CASE WHEN change_type = 'ADD' THEN 1 END) AS add_count,
+                COUNT(CASE WHEN change_type = 'MODIFY' THEN 1 END) AS modify_count,
+                COUNT(CASE WHEN change_type = 'RENAME' THEN 1 END) AS rename_count
+            FROM git_changes
+            GROUP BY
+                commit_hash
+        ), 
+        valid_commits AS (
+            SELECT DISTINCT commit_hash
+            FROM commits_changes_count
+            WHERE add_count BETWEEN :add_min AND :add_max
+                AND modify_count BETWEEN :modify_min AND :modify_max
+                AND rename_count BETWEEN :rename_min AND :rename_max
+        ),  filtered_change AS (
             SELECT * FROM git_changes
-            WHERE commit_hash NOT IN invalid_commits
+            WHERE commit_hash IN valid_commits
         ), valid_methods AS (
             SELECT id, file_path FROM git_methods
             WHERE simple_name NOT IN ('main(String [ ] args)', 'suite()', 'setUp()', 'tearDown()')
             AND simple_name NOT LIKE ('for(int i%')
         ), tested_functions AS (
-            SELECT valid_methods.id AS tested_method_id, commit_hash FROM (
-                filtered_change INNER JOIN valid_methods
+            SELECT valid_methods.id AS tested_method_id, commit_hash
+            FROM filtered_change
+            INNER JOIN valid_methods
                 ON valid_methods.id = filtered_change.target_method_id
-            )
             WHERE file_path LIKE :tested_path
         ), test_methods AS (
-            SELECT valid_methods.id AS test_method_id, commit_hash FROM (
-                filtered_change INNER JOIN valid_methods
+            SELECT valid_methods.id AS test_method_id, commit_hash
+            FROM filtered_change
+            INNER JOIN valid_methods
                 ON valid_methods.id = filtered_change.target_method_id
-            )
             WHERE valid_methods.file_path LIKE :test_path
-        ), tested_change_count AS (
-            SELECT tested_method_id AS count_id, COUNT(tested_method_id) AS change_num FROM tested_functions
-            GROUP BY tested_method_id
+        ), test_change_count AS (
+            SELECT test_method_id AS count_id, COUNT(*) AS change_num
+            FROM test_methods
+            GROUP BY test_method_id
         ), co_change_table AS (
-            SELECT tested_method_id, test_method_id, COUNT(*) AS support FROM (
-        tested_functions INNER JOIN test_methods
-        ON test_methods.commit_hash = tested_functions.commit_hash
-            )
+            SELECT tested_method_id, test_method_id, COUNT(*) AS support
+            FROM tested_functions
+            INNER JOIN test_methods
+                ON test_methods.commit_hash = tested_functions.commit_hash
             GROUP BY tested_method_id, test_method_id
         )
-        SELECT tested_method_id, test_method_id, support, CAST(support AS FLOAT)/change_num AS confidence FROM (
-            co_change_table INNER JOIN tested_change_count
-            ON tested_method_id = count_id
-        )
+        SELECT
+               tested_method_id,
+               test_method_id,
+               MAX(support),
+               CAST(support AS FLOAT)/change_num AS confidence
+        FROM co_change_table
+            INNER JOIN test_change_count
+        GROUP BY test_method_id
+        
     '''
 
 
@@ -112,8 +125,7 @@ class CoChangedtedForAllChangeTypeFilteredCommitLinkEstablisher(AbsLinkEstablish
             SELECT DISTINCT commit_hash 
             FROM git_changes
             GROUP BY commit_hash 
-                HAVING COUNT(*) < :changes_count_max 
-                AND COUNT(*) > :changes_count_min       
+                HAVING COUNT(*) BETWEEN :changes_count_min AND :changes_count_max
         ), filtered_change AS (
             SELECT * FROM git_changes
             WHERE commit_hash IN valid_commits
@@ -144,10 +156,17 @@ class CoChangedtedForAllChangeTypeFilteredCommitLinkEstablisher(AbsLinkEstablish
                 ON test_methods.commit_hash = tested_functions.commit_hash
             GROUP BY tested_method_id, test_method_id
         )
-        SELECT tested_method_id, test_method_id, support, CAST(support AS FLOAT)/change_num AS confidence 
+        SELECT 
+            tested_method_id, 
+            test_method_id, 
+            MAX(support), 
+            CAST(support AS FLOAT)/change_num AS confidence 
         FROM co_change_table 
         INNER JOIN test_change_count
             ON test_method_id = count_id
+        GROUP BY test_method_id
+        
+        
     '''
 
 
@@ -186,7 +205,7 @@ class CoCreatedWithFilteredCommitLinkEstablisher(AbsLinkEstablisher):
             FROM git_changes
                 WHERE change_type = 'ADD' 
             GROUP BY commit_hash 
-            HAVING COUNT(*) > :add_count_min AND COUNT(*) < :add_count_max
+            HAVING COUNT(*) > :add_min AND COUNT(*) < :add_max
         ), filtered_change AS (
             SELECT * FROM git_changes
             WHERE commit_hash IN valid_commits
@@ -249,63 +268,70 @@ class AprioriWithFilteredCommitLinkEstablisher(AbsLinkEstablisher):
             SELECT DISTINCT commit_hash 
             FROM git_changes
             GROUP BY commit_hash 
-                HAVING COUNT(*) < :changes_count_max 
-                AND COUNT(*) > :changes_count_min
+                HAVING COUNT(*) BETWEEN :change_min AND :change_max
         ), filtered_change AS (
-            SELECT * 
-            FROM git_changes
+            SELECT * FROM git_changes
             WHERE commit_hash IN valid_commits
         ), valid_methods AS (
-            SELECT id, file_path 
-            FROM git_methods
+            SELECT id, file_path FROM git_methods
             WHERE simple_name NOT IN ('main(String [ ] args)', 'suite()', 'setUp()', 'tearDown()')
-                AND simple_name NOT LIKE ('for(int i%')
-        ), tested_changes AS (
-            SELECT valid_methods.id AS tested_method_id, commit_hash 
-            FROM filtered_change 
-            INNER JOIN valid_methods
-                ON valid_methods.id = filtered_change.target_method_id
+            AND simple_name NOT LIKE ('for(int i%')
+        ), 
+        test_methods AS (
+            SELECT id FROM valid_methods
+            WHERE file_path LIKE :test_path
+        ),
+        tested_functions AS (
+            SELECT id FROM valid_methods
             WHERE file_path LIKE :tested_path
-        ), test_changes AS (
-            SELECT valid_methods.id AS test_method_id, commit_hash 
-            FROM filtered_change 
-            INNER JOIN valid_methods
-                ON valid_methods.id = filtered_change.target_method_id
-            WHERE valid_methods.file_path LIKE :test_path
-        ), tested_functions_count AS (
-            SELECT tested_method_id, COUNT(*) AS tested_count 
-            FROM tested_changes
-            GROUP BY tested_method_id
-        ), test_methods_count AS (
-            SELECT test_method_id, COUNT(*) AS test_count 
-            FROM test_changes
-            GROUP BY test_method_id
-        ), frequent_tested_functions AS (
-            SELECT tested_method_id 
-            FROM tested_functions_count
-            WHERE tested_count > :min_support_for_change
-        ), frequent_test_methods AS (
-            SELECT test_method_id 
-            FROM test_methods_count
-            WHERE test_count > :min_support_for_change
-        ), co_change_table AS (
-            SELECT tested_method_id AS tested_id, test_method_id AS test_id, COUNT(*) AS support 
-            FROM tested_changes 
-            INNER JOIN test_changes
-                ON test_changes.commit_hash = tested_changes.commit_hash
-            WHERE test_method_id IN frequent_test_methods
-                AND tested_method_id IN frequent_tested_functions
-            GROUP BY tested_method_id, test_method_id HAVING support > :min_support_for_cochange
+        ), 
+        frequent_method AS (
+            SELECT 
+                target_method_id AS test_id, 
+                COUNT(*) AS test_support 
+            FROM filtered_change
+            WHERE test_id IN test_methods
+            GROUP BY test_id
+                HAVING test_support >= :min_test_changes_support
+        ),
+        frequent_functions AS (
+            SELECT 
+                target_method_id AS tested_id, 
+                COUNT(*) AS tested_support 
+            FROM filtered_change
+            WHERE tested_id IN tested_functions
+            GROUP BY tested_id
+                HAVING tested_support >= :min_tested_changes_support
+        ),
+        frequent_methods_changes AS (
+            SELECT commit_hash, test_id, test_support
+            FROM frequent_method 
+            INNER JOIN filtered_change
+                ON target_method_id = test_id
+        ),
+        frequent_functions_changes AS (
+            SELECT commit_hash, tested_id, tested_support
+            FROM frequent_functions
+            INNER JOIN filtered_change
+                ON target_method_id = tested_id
+        ),
+        frequent_cochange_table AS(
+            SELECT 
+                tested_id, test_id, 
+                COUNT(*) AS cochange_support, 
+                tested_support 
+            FROM frequent_methods_changes 
+            INNER JOIN frequent_functions_changes
+                ON frequent_methods_changes.commit_hash = frequent_functions_changes.commit_hash
+            GROUP BY tested_id, test_id
+                HAVING cochange_support >= :min_coevolved_changes_support
         )
         SELECT 
-            tested_id, 
-            test_id, 
-            support, 
-            CAST(support AS FLOAT)/test_count AS confidence 
-        FROM co_change_table 
-        INNER JOIN test_methods_count
-            ON test_method_id = test_id
-        WHERE confidence > :min_confidence
+            tested_id, test_id, 
+            cochange_support, 
+            CAST(cochange_support AS FLOAT)/tested_support AS confidence
+        FROM frequent_cochange_table
+        WHERE confidence >= :min_confidence
     '''
 
 class CoChangedInCommitClassLevelLinkEstablisherWithFilter(AbsLinkEstablisher):

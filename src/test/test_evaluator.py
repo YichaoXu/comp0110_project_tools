@@ -10,7 +10,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from pandas import DataFrame
 
 from evaluator4link.evaluator import LinkEvaluator, FileCommitsCountMeasurement, ClassCommitsCountMeasurement, \
-    TestedCommitsCountMeasurement, TestCommitsCountMeasurement, MethodCommitsCountMeasurement
+    TestedCommitsCountMeasurement, TestCommitsCountMeasurement, MethodCommitsCountMeasurement, CommitsDataMeasurement
 from evaluator4link.measurements.with_ground_truth.for_common_strategy.precision_recall_f1 import \
     PrecisionRecallMeasurementClassLevel, PrecisionRecallMeasurement
 from sql2link import TraceabilityPredictor, LinkStrategy, LinkBase
@@ -176,56 +176,38 @@ def draw_2d_scatter_for_commits_distributions():
     plt.show()
 
 
-def draw_2d_fig_for_test_and_tested_and_commits():
-    def draw_2d_scatter_for_ground_truth_and_predict_in_commits(
-            axes: Axes,
-            ground_truth_count: Dict[int, int],
-            predicted_count: Dict[int, int],
-            title: str,
-            y_max: Optional[int] = None
+def draw_2d_fig_for_test_and_tested_and_commits(project_name: str):
+    path_to_comp0110 = os.path.expanduser('~/Project/PycharmProjects/comp0110')
+    path_to_tmp = f'{path_to_comp0110}/.tmp'
+    path_to_db = f'{path_to_tmp}/{project_name}.db'
+    methods = CommitsDataMeasurement(path_to_db)
+    tests_coord = methods.coordinates_for_test
+    testeds_coord = methods.coordinates_for_tested
 
-    ) -> None:
-        filtered: Dict[int, int] = dict()
-        xs, ys = list(), list()
-        for commit, count in predicted_count.items():
-            if y_max is not None and count > y_max:
-                filtered[commit] = count
-                continue
-            xs.append(commit)
-            ys.append(count)
-        axes.scatter(np.array(xs), np.array(ys), c='b', marker='.', s=200)
+    def __classify_changes(coord: List[Tuple[int, int, int]], color: str, size: int):
+        added, modified, renamed = (list(), list()), (list(), list()), (list(), list())
+        for method_y, commit_x, type_c in coord:
+            stored = None
+            if type_c == 1: stored = added
+            elif type_c == 2: stored = modified
+            elif type_c == 3: stored = renamed
+            if stored is None: continue
+            stored[0].append(commit_x)
+            stored[1].append(method_y)
+        plt.scatter(np.array(added[0]), np.array(added[1]), c=color, marker='+', s=size, alpha=0.5)
+        plt.scatter(np.array(modified[0]), np.array(modified[1]), c=color, marker='^', s=size, alpha=0.5)
+        plt.scatter(np.array(renamed[0]), np.array(renamed[1]), c=color, marker='*', s=size, alpha=0.5)
 
-        xs, ys = list(), list()
-        for commit, count in ground_truth_count.items():
-            if commit in filtered:
-                print(f'{count} valid links from {filtered[commit]} predicted ones in commit {commit} are filtered')
-                continue
-            xs.append(commit)
-            ys.append(count)
-        axes.scatter(np.array(xs), np.array(ys), c='r', marker='.', s=200)
-        axes.set_xlabel('commit_id')
-        axes.set_ylabel('co_changed_num')
-        axes.set_title(title)
-        return None
-
-    evaluate_report = LinkEvaluator(path_to_db, path_to_csv).coordinates_for_test_and_tested_and_commits()
-    fig = plt.figure(num=2, figsize=(25, 25))
-    draw_2d_scatter_for_ground_truth_and_predict_in_commits(
-        fig.add_subplot(211),
-        evaluate_report.commits_ground_truth,
-        evaluate_report.commit_predicted_co_changed_for_test,
-        'test_based',
-        20
-    )
-    draw_2d_scatter_for_ground_truth_and_predict_in_commits(
-        fig.add_subplot(212),
-        evaluate_report.commits_ground_truth,
-        evaluate_report.commit_predicted_co_changed_for_tested,
-        'tested_based',
-        20
-    )
+    test_changes_commits = {commit_x for method_y, commit_x, type_c in tests_coord}
+    tested_changes_commits = {commit_x for method_y, commit_x, type_c in testeds_coord}
+    valid_commits = test_changes_commits.union(tested_changes_commits)
+    co_changed_commits = test_changes_commits.intersection(tested_changes_commits)
+    print('valid', len(valid_commits))
+    print('co_changed', len(co_changed_commits))
+    __classify_changes(testeds_coord, color='red', size=10)
+    __classify_changes(tests_coord, color='blue', size=10)
+    plt.savefig(f"changes_history_view_{project_name}.pdf", bbox_inches='tight')
     plt.show()
-
 
 
 def draw_box_plot_for_changes_in_commits(
@@ -388,120 +370,27 @@ def loop_for_precision(
     f.savefig(f"{path_to_db.split('/')[-1]}.pdf", bbox_inches='tight')
     plt.close()
 
-
-def loop_for_precision_class(path_to_csv: str, path_to_db: str, max_range: range, is_verbose: bool = False):
-    establisher = TraceabilityPredictor(path_to_db)
-    strategy = 'links_filtered_commits_based_cocreated_classes'
-    reports = list()
-    for max_value in max_range:
-        establisher.run_class_level_with_filter(
-            LinkStrategy.COCREATE,
-            LinkBase.FOR_COMMITS,
-            parameters={
-                'add_count_max': max_value,
-                'add_count_min': 0
-            },
-            is_previous_ignored=True
-        )
-        report = PrecisionRecallMeasurementClassLevel(path_to_db, path_to_csv,strategy)
-        if is_verbose: print(report)
-        reports.append(report)
-    X_es = max_range
-    Y_precisions = np.array([report.precision for report in reports])
-    Y_recalls = np.array([report.recall for report in reports])
-    Y_f1s = np.array([report.f1_score for report in reports])
-    plt.figure(num=1, figsize=(10, 5))
-    plt.plot(X_es, Y_precisions, color='red', linewidth=1, label='Precision')
-    plt.plot(X_es, Y_recalls, color='blue', linestyle='--', linewidth=1, label='Recall')
-    plt.plot(X_es, Y_f1s, color='orange', linestyle='-.', linewidth=1, label='F1 Score')
-    plt.xlabel('Max Change Count')
-    plt.ylabel('Measurements')
-    plt.legend(loc='upper right')
-    plt.show()
-
 if __name__ == '__main__':
-    addeds, modifieds, renameds, totals = list(), list(), list(), list()
-
-    def __classify_changes(
-            change_coordinates: List[Tuple[int, int, int]],
-    ) -> None:
-        added_dict, modified_dict, renamed_dict, total_dict = dict(), dict(), dict(), dict()
-        for commit_x, count_y, type_c in change_coordinates:
-            added_dict.setdefault(commit_x, 0)
-            modified_dict.setdefault(commit_x, 0)
-            renamed_dict.setdefault(commit_x, 0)
-            total_dict.setdefault(commit_x, 0)
-            if type_c == 1:
-                added_dict[commit_x] = count_y
-            elif type_c == 2:
-                modified_dict[commit_x] = count_y
-            elif type_c == 3:
-                renamed_dict[commit_x] = count_y
-            else:
-                continue
-            total_dict[commit_x] += count_y
-        addeds.append([count for count in added_dict.values()])
-        modifieds.append([count for count in modified_dict.values()])
-        renameds.append([count for count in renamed_dict.values()])
-        totals.append([count for count in total_dict.values()])
-        return None
-
     path_to_comp0110 = os.path.expanduser('~/Project/PycharmProjects/comp0110')
     path_to_tmp = f'{path_to_comp0110}/.tmp'
-    strategy = 'links_commits_based_cocreated'
-
-    lang_method_coords = MethodCommitsCountMeasurement(
-        f'{path_to_tmp}/commons_lang.db'
-    ).commits_count_coordinates
-    __classify_changes(lang_method_coords)
-
-    io_method_coords = MethodCommitsCountMeasurement(
-        f'{path_to_tmp}/commons_io.db'
-    ).commits_count_coordinates
-    __classify_changes(io_method_coords)
-
-    jfreechart_method_coords = MethodCommitsCountMeasurement(
-        f'{path_to_tmp}/jfreechart.db',
-        path_to_test='test%',
-        path_to_tested='source%'
-    ).commits_count_coordinates
-    __classify_changes(jfreechart_method_coords)
-
-    plt.boxplot(
-        x=[totals[0], totals[1], totals[2]],
-        positions=[2, 4, 6],
-        labels=('Commons-Lang', 'Commons-IO', 'JFreeChart'),
-        vert=False,
-        showfliers=False
+    path_to_db = f'{path_to_tmp}/commons_lang.db'
+    path_to_csv = f'{path_to_tmp}/commons-lang-oracle-method-links.csv'
+    strategy = 'links_commits_based_apriori'
+    TraceabilityPredictor(path_to_db).run(
+        strategy=LinkStrategy.APRIORI,
+        base=LinkBase.FOR_COMMITS,
+        parameters={
+            'min_test_changes_support': 3,
+            'min_tested_changes_support': 1,
+            'min_coevolved_changes_support': 2,
+            'min_confidence': 0.5
+        },
+        is_previous_ignored=True
     )
-    plt.boxplot(
-        x=[addeds[0], addeds[1], addeds[2]],
-        positions=[1.5, 3.5, 5.5],
-        labels=('', '', ''),
-        boxprops={'color':'red'},
-        vert=False,
-        showfliers=False
-    )
-    plt.boxplot(
-        x=[modifieds[0], modifieds[1], modifieds[2]],
-        positions=[1, 3, 5],
-        labels=('', '', ''),
-        boxprops={'color':'blue'},
-        vert=False,
-        showfliers=False
-    )
-    plt.boxplot(
-        x=[renameds[0], renameds[1], renameds[2]],
-        positions=[0.5, 2.5, 4.5],
-        labels=('', '', ''),
-        boxprops={'color':'green'},
-        vert=False,
-        showfliers=False
-    )
-    plt.grid()
-    plt.xlabel('change count')
-    plt.savefig(f"change_distribution_per_commit.pdf", bbox_inches='tight')
-    plt.show()
+    print(PrecisionRecallMeasurement(path_to_db, path_to_csv, strategy))
+
+
+
 
 
 

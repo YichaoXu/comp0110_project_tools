@@ -92,10 +92,15 @@ class CoChangedtedForSeparateChangeTypeFilteredWeekLinkEstablisher(AbstractCoCha
             )
             GROUP BY tested_id, test_id
         )
-        SELECT tested_id, test_id, support, CAST(support AS FLOAT)/change_num AS confidence FROM (
-            co_change_table INNER JOIN tested_change_count
+        SELECT 
+            tested_id, 
+            test_id, 
+            support, 
+            CAST(support AS FLOAT)/change_num AS confidence 
+        FROM co_change_table 
+            INNER JOIN tested_change_count
             ON tested_id = count_id
-        )
+        
     '''
 
 

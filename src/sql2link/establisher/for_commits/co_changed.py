@@ -165,4 +165,5 @@ class CoChangedInCommitClassLevelLinkEstablisher(AbsLinkEstablisher):
         INNER JOIN tested_classes_changes_count
         ON tested_class = count_class
         AND tested_file = count_file
+        
     '''

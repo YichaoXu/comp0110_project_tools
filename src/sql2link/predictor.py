@@ -30,7 +30,7 @@ class TraceabilityPredictor(object):
         strategy: LinkStrategy,
         base: LinkBase,
         parameters=None,
-        ignore_previous: bool = False
+        is_previous_ignored: bool = False
     ):
         if parameters is None: parameters = dict()
         establish: Optional[AbsLinkEstablisher] = None
@@ -43,7 +43,7 @@ class TraceabilityPredictor(object):
         elif strategy is LinkStrategy.APRIORI:
             if base is LinkBase.FOR_COMMITS: establish = AprioriInCommitLinkEstablisher(self.__db_path)
             elif base is LinkBase.FOR_WEEKS: establish = AprioriInWeekLinkEstablisher(self.__db_path)
-        if establish is not None: establish.do(parameters=parameters,is_previous_ingored=ignore_previous)
+        if establish is not None: establish.do(parameters=parameters,is_previous_ingored=is_previous_ignored)
 
     def run_with_filter(
         self,

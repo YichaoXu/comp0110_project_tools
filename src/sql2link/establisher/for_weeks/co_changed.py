@@ -76,9 +76,13 @@ class CoChangedInWeekLinkEstablisher(AbsLinkEstablisher):
                 ON test_modified.change_week = tested_modified.change_week
             ) GROUP BY tested_method_id, test_method_id
         )
-        SELECT co_changed.tested_method_id, test_method_id, support, CAST(support AS FLOAT)/changed_count AS confidence
-        FROM (
-            co_changed INNER JOIN tested_count
+        SELECT 
+            co_changed.tested_method_id AS tested_method_id, 
+            test_method_id, 
+            MAX(support), 
+            CAST(support AS FLOAT)/changed_count AS confidence
+        FROM co_changed 
+            INNER JOIN tested_count
             ON co_changed.tested_method_id = tested_count.tested_method_id
-        )
+        GROUP BY test_method_id
     '''
