@@ -1,4 +1,4 @@
-# A Tool for etabilishing the test-to-code traceability link by CoEv strategy 
+# A Tool for establishing the test-to-code traceability link by CoEv strategy 
 ## 1. Description
 
 It is a tool for establishing the test-to-code traceability link from the co-evolution relationship between the methods 
@@ -31,5 +31,5 @@ and functions in the same commit.
  ┣ 📂evaluator4link          // The directory for codes about evaluating the strategy
  ┃ ┣ 📂measurements              // The classes for the implementation of different measurements methods 
  ┃ ┗ 📜evaluator.py              // The main class providing APIs about the stratgy evaluating
- ┗ 📂test
+ ┗ 📂test                    // Tests for the codes
 ```
