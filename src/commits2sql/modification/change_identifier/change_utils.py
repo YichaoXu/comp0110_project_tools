@@ -3,7 +3,8 @@ import errno
 import shutil
 import subprocess
 import tempfile
-from typing import List, Tuple, Dict, Set, Any, Optional
+from config import GUMTREE_PATH
+from typing import List, Tuple, Dict, Optional
 
 
 class CodeAnalyser(object):
@@ -59,7 +60,7 @@ class CodeDiffer(object):
     __NAME_AFTER = 'after'
     __NAME_BEFORE = 'before'
     __SUFFIX = 'java'
-    __CMD_DIFF = 'gumtree textdiff {before} {after}'
+    __CMD_DIFF = GUMTREE_PATH + ' textdiff {before} {after}'
 
     def __init__(self):
         self.__tmp_dir = tempfile.mkdtemp()

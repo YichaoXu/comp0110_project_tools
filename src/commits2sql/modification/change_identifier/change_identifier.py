@@ -1,5 +1,4 @@
-import re
-from typing import Dict, Tuple, Optional
+from typing import Dict, Optional
 from commits2sql.modification.change_identifier.change_utils import CodeDiffer, ChangeClassifier, CodeAnalyser
 
 
@@ -36,7 +35,7 @@ class ChangeIdentifier(object):
 
     def new_classname_of(self, old_classname: str) -> Optional[str]:
         line_num_before = self.__before.get_line_num_of_class(old_classname)
-        if line_num_before not in self.__line_nums_dict:return None
+        if line_num_before not in self.__line_nums_dict: return None
         line_num_current = self.__line_nums_dict[line_num_before]
         return self.__current.get_classname_at_line(line_num_current)
 

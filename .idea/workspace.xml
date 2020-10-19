@@ -20,22 +20,25 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="77479ddf-4a34-478b-b9e4-53ecd375bd02" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/bin/util.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gitingore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitingore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/comp0110_project_tools.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/sqldialects.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/config.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/commit2Sql" beforeDir="false" afterPath="$PROJECT_DIR$/bin/commit2Sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/commits2sql/modification/change_identifier/change_identifier.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/commits2sql/modification/change_identifier/change_identifier.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/commits2sql/modification/change_identifier/change_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/commits2sql/modification/change_identifier/change_utils.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -52,6 +55,72 @@
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PythonContentEntriesConfigurable" />
   </component>
+  <component name="RunManager" selected="Python.commit2Sql">
+    <configuration name="commit2Sql" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="tool" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/bin" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <EXTENSION ID="net.ashald.envfile">
+        <option name="IS_ENABLED" value="false" />
+        <option name="IS_SUBST" value="false" />
+        <option name="IS_PATH_MACRO_SUPPORTED" value="false" />
+        <option name="IS_IGNORE_MISSING_FILES" value="false" />
+        <option name="IS_ENABLE_EXPERIMENTAL_INTEGRATIONS" value="false" />
+        <ENTRIES>
+          <ENTRY IS_ENABLED="true" PARSER="runconfig" />
+        </ENTRIES>
+      </EXTENSION>
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/bin/commit2Sql" />
+      <option name="PARAMETERS" value="-i test_p01 -o test_p02 test/path/to/target" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="config" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="tool" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/config.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="Python.commit2Sql" />
+      <item itemvalue="Python.config" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python.commit2Sql" />
+        <item itemvalue="Python.config" />
+      </list>
+    </recent_temporary>
+  </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
@@ -67,7 +136,7 @@
       <workItem from="1603029845708" duration="225000" />
       <workItem from="1603033871897" duration="514000" />
       <workItem from="1603085890359" duration="104000" />
-      <workItem from="1603086010121" duration="73000" />
+      <workItem from="1603086010121" duration="9614000" />
     </task>
     <servers />
   </component>
@@ -87,10 +156,76 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="WindowStateProjectService">
+    <state x="537" y="249" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1603116425814">
+      <screen x="92" y="23" width="1956" height="1129" />
+    </state>
+    <state x="537" y="249" key="#com.intellij.execution.impl.EditConfigurationsDialog/92.23.1956.1129@92.23.1956.1129" timestamp="1603116425814" />
+    <state width="896" height="466" key="DebuggerActiveHint" timestamp="1603113155023">
+      <screen x="92" y="23" width="1956" height="1129" />
+    </state>
+    <state width="896" height="466" key="DebuggerActiveHint/92.23.1956.1129@92.23.1956.1129" timestamp="1603113155023" />
+    <state width="954" height="314" key="GridCell.Tab.0.bottom" timestamp="1603116799856">
+      <screen x="92" y="23" width="1956" height="1129" />
+    </state>
+    <state width="954" height="314" key="GridCell.Tab.0.bottom/92.23.1956.1129@92.23.1956.1129" timestamp="1603116799856" />
+    <state width="954" height="314" key="GridCell.Tab.0.center" timestamp="1603116799856">
+      <screen x="92" y="23" width="1956" height="1129" />
+    </state>
+    <state width="954" height="314" key="GridCell.Tab.0.center/92.23.1956.1129@92.23.1956.1129" timestamp="1603116799856" />
+    <state width="954" height="314" key="GridCell.Tab.0.left" timestamp="1603116799856">
+      <screen x="92" y="23" width="1956" height="1129" />
+    </state>
+    <state width="954" height="314" key="GridCell.Tab.0.left/92.23.1956.1129@92.23.1956.1129" timestamp="1603116799856" />
+    <state width="954" height="314" key="GridCell.Tab.0.right" timestamp="1603116799856">
+      <screen x="92" y="23" width="1956" height="1129" />
+    </state>
+    <state width="954" height="314" key="GridCell.Tab.0.right/92.23.1956.1129@92.23.1956.1129" timestamp="1603116799856" />
+    <state width="954" height="386" key="GridCell.Tab.1.bottom" timestamp="1603116597776">
+      <screen x="92" y="23" width="1956" height="1129" />
+    </state>
+    <state width="954" height="386" key="GridCell.Tab.1.bottom/92.23.1956.1129@92.23.1956.1129" timestamp="1603116597776" />
+    <state width="954" height="386" key="GridCell.Tab.1.center" timestamp="1603116597776">
+      <screen x="92" y="23" width="1956" height="1129" />
+    </state>
+    <state width="954" height="386" key="GridCell.Tab.1.center/92.23.1956.1129@92.23.1956.1129" timestamp="1603116597776" />
+    <state width="954" height="386" key="GridCell.Tab.1.left" timestamp="1603116597776">
+      <screen x="92" y="23" width="1956" height="1129" />
+    </state>
+    <state width="954" height="386" key="GridCell.Tab.1.left/92.23.1956.1129@92.23.1956.1129" timestamp="1603116597776" />
+    <state width="954" height="386" key="GridCell.Tab.1.right" timestamp="1603116597776">
+      <screen x="92" y="23" width="1956" height="1129" />
+    </state>
+    <state width="954" height="386" key="GridCell.Tab.1.right/92.23.1956.1129@92.23.1956.1129" timestamp="1603116597776" />
     <state x="601" y="234" key="SettingsEditor" timestamp="1603086082227">
       <screen x="92" y="23" width="1956" height="1129" />
     </state>
     <state x="533" y="215" key="SettingsEditor/0.0.2048.1152@0.0.2048.1152" timestamp="1603035956458" />
     <state x="601" y="234" key="SettingsEditor/92.23.1956.1129@92.23.1956.1129" timestamp="1603086082227" />
+    <state width="975" height="564" key="XDebugger.FullValuePopup" timestamp="1603097435045">
+      <screen x="92" y="23" width="1956" height="1129" />
+    </state>
+    <state width="975" height="564" key="XDebugger.FullValuePopup/92.23.1956.1129@92.23.1956.1129" timestamp="1603097435045" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/bin/commit2Sql</url>
+          <line>48</line>
+          <option name="timeStamp" value="8" />
+        </line-breakpoint>
+      </breakpoints>
+      <default-breakpoints>
+        <breakpoint type="python-exception">
+          <properties notifyOnTerminate="true" exception="BaseException">
+            <option name="notifyOnTerminate" value="true" />
+          </properties>
+        </breakpoint>
+      </default-breakpoints>
+    </breakpoint-manager>
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/tool$config.coverage" NAME="config Coverage Results" MODIFIED="1603097727459" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/tool$commit2Sql.coverage" NAME="commit2Sql Coverage Results" MODIFIED="1603116799850" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/bin" />
   </component>
 </project>

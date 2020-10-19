@@ -1,0 +1,49 @@
+#!/usr/bin/python3
+# -*-coding:utf-8 -*-
+import re
+import sys
+import enum
+from time import strptime
+
+import config
+
+import bin.util as tool_util
+from commits2sql.miner import DataMiner
+
+
+class ParName(enum.Enum):
+    INPUT_PATH = '-i'
+    OUTPUT_PATH = '-o'
+    START_DATE = '-sd'
+    END_DATE = '-ed'
+    START_COMMIT = '-sc'
+    END_COMMIT = '-ec'
+
+
+if len(sys.argv) < 2: tool_util.error_and_exit('TOO LESS PARAMETERS', 'Please specify the path to repository')
+target_project = sys.argv[-1]
+in_str = ' '.join(sys.argv[1:-1])
+in_par_strs = re.findall(r'(-\w+\s\w+)', in_str)
+
+
+pars = {
+    ParName.OUTPUT_PATH: config.OUTPUT_PATH,
+    ParName.INPUT_PATH: target_project,
+}
+
+for par_str in in_par_strs:
+    par_name, _, par_val = par_str.partition(' ')
+    pars[ParName(par_name)] = par_val
+
+miner = DataMiner(pars[ParName.OUTPUT_PATH], pars[ParName.INPUT_PATH])
+date_format = '%d-%m-%Y'
+start_date = strptime(pars[ParName.START_DATE], date_format) if ParName.START_DATE in pars else None
+end_date = strptime(pars[ParName.END_DATE], date_format) if ParName.END_DATE in pars else None
+from_commit = pars[ParName.START_COMMIT]
+end_commit = pars[ParName.END_COMMIT]
+print('Start mining ...')
+miner.mining(
+    start_date, end_date,
+    from_commit, end_commit
+)
+print('DONE')
