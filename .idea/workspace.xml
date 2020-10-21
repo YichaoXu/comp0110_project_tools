@@ -20,121 +20,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="77479ddf-4a34-478b-b9e4-53ecd375bd02" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/example/input/commons_lang.zip" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/input/gt_commons_lang.csv" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/main.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/libs/gumtree.zip" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/requirement.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitingore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitingore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/config.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/architecture_design.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/architecture_design.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/basic_conception.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/basic_conception.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/help_doc.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/install_instructions.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/install_instructions.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docs/usages_with_example.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/usages_with_example.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/input/commons_lang/src/main/java/org/apache/commons/lang3/builder/EqualsExclude.java" beforeDir="false" afterPath="$PROJECT_DIR$/example/input/commons_lang/src/main/java/org/apache/commons/lang3/builder/EqualsExclude.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/input/commons_lang/src/main/java/org/apache/commons/lang3/builder/HashCodeExclude.java" beforeDir="false" afterPath="$PROJECT_DIR$/example/input/commons_lang/src/main/java/org/apache/commons/lang3/builder/HashCodeExclude.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/input/commons_lang/src/main/java/org/apache/commons/lang3/builder/ToStringExclude.java" beforeDir="false" afterPath="$PROJECT_DIR$/example/input/commons_lang/src/main/java/org/apache/commons/lang3/builder/ToStringExclude.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/input/commons_lang/src/site/resources/download_lang.cgi" beforeDir="false" afterPath="$PROJECT_DIR$/example/input/commons_lang/src/site/resources/download_lang.cgi" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/bin/gumtree" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/bin/gumtree.bat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/ST4-4.0.8.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/animal-sniffer-annotations-1.17.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/antlr-3.5.2.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/antlr-runtime-3.5.2.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/aopalliance-1.0.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/asm-3.1.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/cglib-2.2.1-v20090111.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/checker-qual-2.5.2.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/classindex-3.4.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/client-2.1.2.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/client.diff-2.1.2.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/commons-codec-1.10.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/commons-io-2.0.1.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/commons-lang3-3.1.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/commons-logging-1.2.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/core-2.1.2.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/error_prone_annotations-2.2.0.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/failureaccess-1.0.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/gen.antlr3-2.1.2.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/gen.antlr3-antlr-2.1.2.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/gen.antlr3-json-2.1.2.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/gen.antlr3-php-2.1.2.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/gen.antlr3-r-2.1.2.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/gen.antlr3-xml-2.1.2.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/gen.c-2.1.2.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/gen.css-2.1.2.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/gen.javaparser-2.1.2.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/gen.jdt-2.1.2.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/gen.js-2.1.2.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/gen.python-2.1.2.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/gen.ruby-2.1.2.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/gen.srcml-2.1.2.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/gson-2.8.2.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/guava-27.0-jre.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/guice-3.0.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/j2objc-annotations-1.1.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/javaparser-core-3.13.1.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/javaparser-symbol-solver-core-3.13.1.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/javaparser-symbol-solver-logic-3.13.1.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/javaparser-symbol-solver-model-3.13.1.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/javassist-3.24.0-GA.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/javax.inject-1.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/javax.servlet-api-3.1.0.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/jetty-client-9.4.6.v20170531.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/jetty-http-9.4.6.v20170531.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/jetty-io-9.4.6.v20170531.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/jetty-security-9.4.6.v20170531.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/jetty-server-9.4.6.v20170531.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/jetty-servlet-9.4.6.v20170531.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/jetty-util-9.4.6.v20170531.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/jetty-webapp-9.4.6.v20170531.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/jetty-xml-9.4.6.v20170531.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/jgrapht-core-1.0.1.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/jrubyparser-0.5.3.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/jsr305-3.0.2.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/jtidy-r938.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/junit-4.8.2.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/org.eclipse.core.commands-3.9.200.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/org.eclipse.core.contenttype-3.7.200.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/org.eclipse.core.expressions-3.6.200.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/org.eclipse.core.filesystem-1.7.200.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/org.eclipse.core.jobs-3.10.200.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/org.eclipse.core.resources-3.13.200.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/org.eclipse.core.runtime-3.15.100.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/org.eclipse.equinox.app-1.4.0.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/org.eclipse.equinox.common-3.10.200.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/org.eclipse.equinox.preferences-3.7.200.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/org.eclipse.equinox.registry-3.8.200.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/org.eclipse.jdt.core-3.16.0.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/org.eclipse.osgi-3.13.200.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/org.eclipse.text-3.8.0.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/ph-commons-9.3.0.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/ph-css-6.1.2.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/rendersnake-1.9.0.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/rhino-1.7.10.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/simmetrics-core-3.2.3.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/slf4j-api-1.7.25.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/slf4j-nop-1.7.25.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/spark-core-2.7.1.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/spring-aop-4.1.6.RELEASE.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/spring-beans-4.1.6.RELEASE.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/spring-context-4.1.6.RELEASE.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/spring-core-4.1.6.RELEASE.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/spring-expression-4.1.6.RELEASE.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/spring-web-4.1.6.RELEASE.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/spring-webmvc-4.1.6.RELEASE.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/trove4j-3.0.3.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/websocket-api-9.4.6.v20170531.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/websocket-client-9.4.6.v20170531.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/websocket-common-9.4.6.v20170531.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/websocket-server-9.4.6.v20170531.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/gumtree/lib/websocket-servlet-9.4.6.v20170531.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/commits2sql/modification/change_identifier/change_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/commits2sql/modification/change_identifier/change_utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/example/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -278,7 +167,7 @@
       <workItem from="1603085890359" duration="104000" />
       <workItem from="1603086010121" duration="12782000" />
       <workItem from="1603127131097" duration="20839000" />
-      <workItem from="1603301132380" duration="591000" />
+      <workItem from="1603301132380" duration="1252000" />
     </task>
     <servers />
   </component>
@@ -298,10 +187,11 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="466" y="231" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1603171577539">
-      <screen x="0" y="0" width="2048" height="1152" />
+    <state x="519" y="249" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1603301977693">
+      <screen x="68" y="23" width="1980" height="1129" />
     </state>
     <state x="466" y="231" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.2048.1152@0.0.2048.1152" timestamp="1603171577539" />
+    <state x="519" y="249" key="#com.intellij.execution.impl.EditConfigurationsDialog/68.23.1980.1129@68.23.1980.1129" timestamp="1603301977693" />
     <state x="537" y="249" key="#com.intellij.execution.impl.EditConfigurationsDialog/92.23.1956.1129@92.23.1956.1129" timestamp="1603118863179" />
     <state width="968" height="466" key="DebuggerActiveHint" timestamp="1603299851459">
       <screen x="66" y="23" width="1982" height="1129" />
@@ -312,38 +202,38 @@
       <screen x="92" y="23" width="1956" height="1129" />
     </state>
     <state x="197" y="123" width="1751" height="929" key="DiffContextDialog/92.23.1956.1129@92.23.1956.1129" timestamp="1603120213114" />
-    <state width="1914" height="314" key="GridCell.Tab.0.bottom" timestamp="1603301705494">
+    <state width="1914" height="314" key="GridCell.Tab.0.bottom" timestamp="1603301836092">
       <screen x="68" y="23" width="1980" height="1129" />
     </state>
     <state width="1914" height="386" key="GridCell.Tab.0.bottom/66.23.1982.1129@66.23.1982.1129" timestamp="1603301161995" />
-    <state width="1914" height="314" key="GridCell.Tab.0.bottom/68.23.1980.1129@68.23.1980.1129" timestamp="1603301705494" />
+    <state width="1914" height="314" key="GridCell.Tab.0.bottom/68.23.1980.1129@68.23.1980.1129" timestamp="1603301836092" />
     <state width="1914" height="386" key="GridCell.Tab.0.bottom/71.23.1977.1129@71.23.1977.1129" timestamp="1603299271954" />
     <state width="1914" height="386" key="GridCell.Tab.0.bottom/74.23.1974.1129@74.23.1974.1129" timestamp="1603296762708" />
     <state width="1909" height="314" key="GridCell.Tab.0.bottom/86.23.1962.1129@86.23.1962.1129" timestamp="1603127127972" />
     <state width="1909" height="386" key="GridCell.Tab.0.bottom/92.23.1956.1129@92.23.1956.1129" timestamp="1603120138452" />
-    <state width="1914" height="314" key="GridCell.Tab.0.center" timestamp="1603301705493">
+    <state width="1914" height="314" key="GridCell.Tab.0.center" timestamp="1603301836092">
       <screen x="68" y="23" width="1980" height="1129" />
     </state>
     <state width="1914" height="386" key="GridCell.Tab.0.center/66.23.1982.1129@66.23.1982.1129" timestamp="1603301161994" />
-    <state width="1914" height="314" key="GridCell.Tab.0.center/68.23.1980.1129@68.23.1980.1129" timestamp="1603301705493" />
+    <state width="1914" height="314" key="GridCell.Tab.0.center/68.23.1980.1129@68.23.1980.1129" timestamp="1603301836092" />
     <state width="1914" height="386" key="GridCell.Tab.0.center/71.23.1977.1129@71.23.1977.1129" timestamp="1603299271954" />
     <state width="1914" height="386" key="GridCell.Tab.0.center/74.23.1974.1129@74.23.1974.1129" timestamp="1603296762707" />
     <state width="1909" height="314" key="GridCell.Tab.0.center/86.23.1962.1129@86.23.1962.1129" timestamp="1603127127971" />
     <state width="1909" height="386" key="GridCell.Tab.0.center/92.23.1956.1129@92.23.1956.1129" timestamp="1603120138451" />
-    <state width="1914" height="314" key="GridCell.Tab.0.left" timestamp="1603301705492">
+    <state width="1914" height="314" key="GridCell.Tab.0.left" timestamp="1603301836092">
       <screen x="68" y="23" width="1980" height="1129" />
     </state>
     <state width="1914" height="386" key="GridCell.Tab.0.left/66.23.1982.1129@66.23.1982.1129" timestamp="1603301161994" />
-    <state width="1914" height="314" key="GridCell.Tab.0.left/68.23.1980.1129@68.23.1980.1129" timestamp="1603301705492" />
+    <state width="1914" height="314" key="GridCell.Tab.0.left/68.23.1980.1129@68.23.1980.1129" timestamp="1603301836092" />
     <state width="1914" height="386" key="GridCell.Tab.0.left/71.23.1977.1129@71.23.1977.1129" timestamp="1603299271954" />
     <state width="1914" height="386" key="GridCell.Tab.0.left/74.23.1974.1129@74.23.1974.1129" timestamp="1603296762706" />
     <state width="1909" height="314" key="GridCell.Tab.0.left/86.23.1962.1129@86.23.1962.1129" timestamp="1603127127971" />
     <state width="1909" height="386" key="GridCell.Tab.0.left/92.23.1956.1129@92.23.1956.1129" timestamp="1603120138451" />
-    <state width="1914" height="314" key="GridCell.Tab.0.right" timestamp="1603301705493">
+    <state width="1914" height="314" key="GridCell.Tab.0.right" timestamp="1603301836092">
       <screen x="68" y="23" width="1980" height="1129" />
     </state>
     <state width="1914" height="386" key="GridCell.Tab.0.right/66.23.1982.1129@66.23.1982.1129" timestamp="1603301161994" />
-    <state width="1914" height="314" key="GridCell.Tab.0.right/68.23.1980.1129@68.23.1980.1129" timestamp="1603301705493" />
+    <state width="1914" height="314" key="GridCell.Tab.0.right/68.23.1980.1129@68.23.1980.1129" timestamp="1603301836092" />
     <state width="1914" height="386" key="GridCell.Tab.0.right/71.23.1977.1129@71.23.1977.1129" timestamp="1603299271954" />
     <state width="1914" height="386" key="GridCell.Tab.0.right/74.23.1974.1129@74.23.1974.1129" timestamp="1603296762708" />
     <state width="1909" height="314" key="GridCell.Tab.0.right/86.23.1962.1129@86.23.1962.1129" timestamp="1603127127971" />
@@ -384,10 +274,11 @@
     <state width="1914" height="386" key="GridCell.Tab.1.right/74.23.1974.1129@74.23.1974.1129" timestamp="1603296762709" />
     <state width="1909" height="386" key="GridCell.Tab.1.right/86.23.1962.1129@86.23.1962.1129" timestamp="1603127127969" />
     <state width="1909" height="386" key="GridCell.Tab.1.right/92.23.1956.1129@92.23.1956.1129" timestamp="1603120138452" />
-    <state x="533" y="215" key="SettingsEditor" timestamp="1603171607637">
-      <screen x="0" y="0" width="2048" height="1152" />
+    <state x="583" y="234" key="SettingsEditor" timestamp="1603302009274">
+      <screen x="68" y="23" width="1980" height="1129" />
     </state>
     <state x="533" y="215" key="SettingsEditor/0.0.2048.1152@0.0.2048.1152" timestamp="1603171607637" />
+    <state x="583" y="234" key="SettingsEditor/68.23.1980.1129@68.23.1980.1129" timestamp="1603302009274" />
     <state x="601" y="234" key="SettingsEditor/92.23.1956.1129@92.23.1956.1129" timestamp="1603086082227" />
     <state width="975" height="564" key="XDebugger.FullValuePopup" timestamp="1603097435045">
       <screen x="92" y="23" width="1956" height="1129" />
@@ -412,7 +303,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/example/main.py</url>
-          <line>19</line>
+          <line>18</line>
           <option name="timeStamp" value="12" />
         </line-breakpoint>
       </breakpoints>
@@ -428,6 +319,6 @@
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/tool$config.coverage" NAME="config Coverage Results" MODIFIED="1603097727459" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/tool$commit2Sql.coverage" NAME="commit2Sql Coverage Results" MODIFIED="1603116799850" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/bin" />
-    <SUITE FILE_PATH="coverage/tool$main.coverage" NAME="main Coverage Results" MODIFIED="1603301705483" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/example" />
+    <SUITE FILE_PATH="coverage/tool$main.coverage" NAME="main Coverage Results" MODIFIED="1603301784607" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/example" />
   </component>
 </project>

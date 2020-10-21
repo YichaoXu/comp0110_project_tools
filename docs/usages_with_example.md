@@ -4,8 +4,8 @@ There are overall three parts for different purposes.
 
 #### 1. Overall 
 
-The directory ["example"](../example) contain a complete example for using the package. The following sections 
-specifically describe the usage for each part. 
+The [main.py](../example/main.py) file in directory ["example"](../example) contain a complete example for using the 
+package. The following sections specifically describe the usage for each part. 
 
 #### 2. commits2sql 
 
