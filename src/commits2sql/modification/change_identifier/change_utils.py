@@ -3,7 +3,6 @@ import errno
 import shutil
 import subprocess
 import tempfile
-from config import GUMTREE_PATH
 from typing import List, Tuple, Dict, Optional
 
 
@@ -60,10 +59,11 @@ class CodeDiffer(object):
     __NAME_AFTER = 'after'
     __NAME_BEFORE = 'before'
     __SUFFIX = 'java'
-    __CMD_DIFF = GUMTREE_PATH + ' textdiff {before} {after}'
+    __CMD_DIFF = 'gumtree textdiff {before} {after}'
 
-    def __init__(self):
-        self.__tmp_dir = tempfile.mkdtemp()
+    def __init__(self, tmp_dir:str = None, gumtree_dir:str = None):
+        self.__tmp_dir = tmp_dir if tmp_dir is not None else tempfile.mkdtemp()
+        self.__gumtree_dir = gumtree_dir if gumtree_dir is not None else ''
 
     def __del__(self):
         try:
@@ -78,7 +78,8 @@ class CodeDiffer(object):
         with open(path_before, 'w') as f: f.write(before)
         with open(path_after, 'w') as f: f.write(after)
         diff_cmd = self.__CMD_DIFF.format(before=path_before, after=path_after)
-        return subprocess.getstatusoutput(diff_cmd)
+        gumtree_cmd = f'{self.__gumtree_dir} {diff_cmd}'
+        return subprocess.getstatusoutput(gumtree_cmd)
 
 
 class ChangeClassifier(object):

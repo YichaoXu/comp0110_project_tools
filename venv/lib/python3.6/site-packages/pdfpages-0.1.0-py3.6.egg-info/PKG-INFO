@@ -1,0 +1,158 @@
+Metadata-Version: 1.1
+Name: pdfpages
+Version: 0.1.0
+Summary: Extract pages from PDF documents
+Home-page: https://github.com/philbooth/pdfpages
+Author: Phil Booth
+Author-email: pmbooth@gmail.com
+License: UNKNOWN
+Download-URL: https://github.com/philbooth/pdfpages/archive/0.1.0.tar.gz
+Description: pdfpages
+        ========
+        
+        .. image:: https://img.shields.io/pypi/v/pdfpages.svg?style=flat-square   :https://pypi.python.org/pypi/pdfpages: 
+        .. image:: https://img.shields.io/github/license/philbooth/pdfpages.svg?style=flat-square   :target: https://opensource.org/licenses/MIT
+        
+        Extract specific pages from PDF documents.
+        
+        * `What is it?`_
+        * `How do I install it?`_
+        * `How do I run it on the command line?`_
+        * `How do I call it from python code?`_
+        * `What license is it released under?`_
+        
+        What is it?
+        -----------
+        
+        A python package
+        that extracts pages from PDF documents
+        and writes them to a fresh PDF.
+        
+        How do I install it?
+        --------------------
+        
+        Via pip::
+        
+          pip install pdfpages
+        
+        Or if you just want the git repo::
+        
+          git clone git@github.com:philbooth/pdfpages.git
+        
+        How do I run it on the command line?
+        ------------------------------------
+        
+        ::
+        
+          pdfpages -o out.pdf in.pdf
+        
+        The ``-o`` option
+        is used to specify
+        the output path
+        and the final argument
+        is the path to the input document.
+        You can specify
+        multiple input documents
+        by listing further paths
+        at the end of the command::
+        
+          pdfpages -o out.pdf in1.pdf in2.pdf
+          pdfpages -o out.pdf in/*.pdf
+        
+        Without other arguments,
+        the default behaviour is
+        to extract the first page
+        from each input document
+        and write the result
+        to the output PDF.
+        
+        If you want to extract specific pages,
+        you can use the ``-p`` option.
+        For instance,
+        to extract just the second page
+        from each input document
+        you woud run::
+        
+          pdfpages -p 2 -o out.pdf in/*.pdf
+        
+        Or to extract the second and third pages
+        from each document::
+        
+          pdfpages -p 2 3 -o out.pdf in/*.pdf
+        
+        You can also use
+        the ``-f`` and ``-c`` options
+        to specify ranges of page numbers.
+        For instance,
+        to extract the first hundred pages
+        from each document::
+        
+          pdfpages -f 1 -c 100 -o out.pdf in/*.pdf
+        
+        Or to extract
+        the second hundred pages::
+        
+          pdfpages -f 101 -c 100 -o out.pdf in/*.pdf
+        
+        You can exclude specific pages
+        from these ranges
+        with the ``-e`` option.
+        For example,
+        to exclude the third page
+        from the first five pages
+        of each input document::
+        
+          pdfpages -f 1 -c 5 -e 3 -o out.pdf in/*.pdf
+        
+        Finally,
+        you can see the usage information
+        at any time
+        using the ``-h`` option::
+        
+          python pdfpages.py -h
+        
+        How do I call it from python code?
+        ----------------------------------
+        
+        ::
+        
+          import pdfpages
+        
+          pdfpages.extract(in_files, out_file, pages, exclude_pages)
+        
+        * ``in_files``:
+          A tuple containing files
+          opened for binary reading
+          (mode ``"rb"``).
+        
+        * ``out_file``:
+          A file
+          opened for binary writing
+          (mode ``"wb"``).
+        
+        * ``pages``:
+          A tuple containing page numbers
+          to extract
+          (integers).
+        
+        * ``exclude_pages``:
+          An optional tuple containing page numbers
+          to exclude from extraction
+          (integers).
+          Defaults to an empty tuple.
+        
+        What license is it released under?
+        ----------------------------------
+        
+        `MIT <LICENSE>`_
+        
+        
+Keywords: pdf,extract,filter,copy,duplicate,pages
+Platform: UNKNOWN
+Classifier: Development Status :: 3 - Alpha
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Natural Language :: English
+Classifier: Programming Language :: Python :: 2
+Classifier: Natural Language :: English
+Classifier: Programming Language :: Python :: 3
+Classifier: Topic :: Utilities
