@@ -20,7 +20,7 @@ and functions in the same commit.
 
 ## 3. Project Structure
 ```
-📦src
+📦testcoev
  ┣ 📂commits2sql             // The directory for codes about mining repository and then storing results into database
  ┃ ┣ 📂database                  // The classes for handling operations to a database 
  ┃ ┣ 📂modification              // The classes warpping the PyDriller and the GumTreeDiff
